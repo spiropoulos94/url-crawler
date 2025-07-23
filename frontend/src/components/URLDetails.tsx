@@ -1,7 +1,7 @@
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { urlAPI } from "../services/api";
+import { useURL } from "../hooks/useURLs";
+import { LoadingSpinner } from "./LoadingSpinner";
 import {
   ArrowLeft,
   Globe,
@@ -24,16 +24,41 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-export const URLDetails: React.FC = () => {
+export const URLDetails: React.FC = React.memo(() => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const urlId = parseInt(id || '0', 10);
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["url", urlId],
-    queryFn: () => urlAPI.getById(urlId),
-    enabled: !!(id && !isNaN(urlId)),
-  });
+  const { data, isLoading, error } = useURL(urlId);
+  
+  const url = data?.data;
+  const result = url?.results?.[0];
+
+  const linkData = useMemo(() => 
+    result ? [
+      {
+        name: "Internal Links",
+        value: result.internal_links,
+        color: "#3b82f6",
+      },
+      {
+        name: "External Links",
+        value: result.external_links,
+        color: "#10b981",
+      },
+    ] : [], [result]
+  );
+
+  const headingData = useMemo(() => 
+    result ? [
+      { level: "H1", count: result.h1_count },
+      { level: "H2", count: result.h2_count },
+      { level: "H3", count: result.h3_count },
+      { level: "H4", count: result.h4_count },
+      { level: "H5", count: result.h5_count },
+      { level: "H6", count: result.h6_count },
+    ].filter((item) => item.count > 0) : [], [result]
+  );
 
   if (!id || isNaN(urlId)) {
     return (
@@ -43,13 +68,10 @@ export const URLDetails: React.FC = () => {
     );
   }
 
-  const url = data?.data;
-  const result = url?.results?.[0];
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        <LoadingSpinner size="lg" text="Loading URL details..." />
       </div>
     );
   }
@@ -62,31 +84,6 @@ export const URLDetails: React.FC = () => {
     );
   }
 
-  const linkData = result
-    ? [
-        {
-          name: "Internal Links",
-          value: result.internal_links,
-          color: "#3b82f6",
-        },
-        {
-          name: "External Links",
-          value: result.external_links,
-          color: "#10b981",
-        },
-      ]
-    : [];
-
-  const headingData = result
-    ? [
-        { level: "H1", count: result.h1_count },
-        { level: "H2", count: result.h2_count },
-        { level: "H3", count: result.h3_count },
-        { level: "H4", count: result.h4_count },
-        { level: "H5", count: result.h5_count },
-        { level: "H6", count: result.h6_count },
-      ].filter((item) => item.count > 0)
-    : [];
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -326,4 +323,4 @@ export const URLDetails: React.FC = () => {
       )}
     </div>
   );
-};
+});

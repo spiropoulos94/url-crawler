@@ -41,9 +41,10 @@ export const Login: React.FC = () => {
       } else {
         await login({ username: username.trim(), password });
       }
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as { response?: { data?: { error?: string } } };
       setError(
-        err.response?.data?.error ||
+        error.response?.data?.error ||
           `${isRegisterMode ? "Registration" : "Login"} failed`
       );
     } finally {

@@ -4,7 +4,7 @@ import { urlAPI } from "../services/api";
 import { Plus, AlertCircle } from "lucide-react";
 import type { AxiosError } from "axios";
 
-export const AddURL: React.FC = () => {
+export const AddURL: React.FC = React.memo(() => {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const queryClient = useQueryClient();
@@ -109,4 +109,4 @@ export const AddURL: React.FC = () => {
       </div>
     </div>
   );
-};
+});

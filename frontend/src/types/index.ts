@@ -78,3 +78,65 @@ export interface BulkActionRequest {
   ids: number[];
   action: 'start' | 'stop' | 'delete' | 'recrawl';
 }
+
+// API Response wrapper types
+export interface APIResponse<T> {
+  data: T;
+  message?: string;
+  error?: string;
+}
+
+export interface APIError {
+  error: string;
+  message?: string;
+  details?: Record<string, string[]>;
+}
+
+// Form state types
+export interface FormState<T> {
+  data: T;
+  errors: Partial<Record<keyof T, string>>;
+  isSubmitting: boolean;
+  isDirty: boolean;
+}
+
+// Pagination params
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+}
+
+// Chart data types
+export interface ChartDataPoint {
+  name: string;
+  value: number;
+  color?: string;
+}
+
+export interface HeadingData {
+  level: string;
+  count: number;
+}
+
+// Component prop types
+export interface TableColumn<T> {
+  key: keyof T;
+  label: string;
+  sortable?: boolean;
+  render?: (value: T[keyof T], item: T) => React.ReactNode;
+}
+
+// Loading states
+export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
+
+// Auth context types
+export interface AuthContextType {
+  user: User | null;
+  isLoading: boolean;
+  login: (credentials: LoginRequest) => Promise<void>;
+  register: (userData: RegisterRequest) => Promise<void>;
+  logout: () => void;
+}

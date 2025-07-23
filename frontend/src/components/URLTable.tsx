@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { urlAPI } from "../services/api";
+import { useURLs, useBulkAction } from "../hooks/useURLs";
+import { usePagination } from "../hooks/usePagination";
+import { TableLoadingSkeleton } from "./LoadingSpinner";
 import {
   Search,
   Play,
@@ -21,41 +22,17 @@ const statusColors: Record<CrawlStatus, string> = {
   error: "bg-red-100 text-red-800",
 };
 
-export const URLTable: React.FC = () => {
+export const URLTable: React.FC = React.memo(() => {
   const navigate = useNavigate();
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [sortBy, setSortBy] = useState("created_at");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-
-  const queryClient = useQueryClient();
-  const limit = 10;
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["urls", page, limit, search, sortBy, sortOrder],
-    queryFn: () =>
-      urlAPI.getAll({
-        page,
-        limit,
-        search,
-        sort_by: sortBy,
-        sort_order: sortOrder,
-      }),
-    placeholderData: (previousData) => previousData,
-  });
-
-  const bulkActionMutation = useMutation({
-    mutationFn: urlAPI.bulkAction,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["urls"] });
-      setSelectedIds([]);
-    },
-  });
+  
+  const pagination = usePagination({ initialLimit: 10 });
+  const { data, isLoading, error } = useURLs(pagination.params);
+  const bulkActionMutation = useBulkAction();
 
   const urls = data?.data?.urls || [];
   const total = data?.data?.total || 0;
-  const totalPages = Math.ceil(total / limit);
+  const totalPages = Math.ceil(total / pagination.limit);
 
   const handleSelectAll = (checked: boolean) => {
     setSelectedIds(checked ? urls.map((url: URL) => url.id) : []);
@@ -72,25 +49,21 @@ export const URLTable: React.FC = () => {
   ) => {
     if (selectedIds.length === 0) return;
 
-    bulkActionMutation.mutate({
-      ids: selectedIds,
-      action,
-    });
-  };
-
-  const handleSort = (column: string) => {
-    if (sortBy === column) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortBy(column);
-      setSortOrder("asc");
-    }
+    bulkActionMutation.mutate(
+      { ids: selectedIds, action },
+      { onSuccess: () => setSelectedIds([]) }
+    );
   };
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="bg-gradient-to-r from-primary-50 to-blue-50 px-8 py-6 border-b border-gray-100">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Website URLs</h2>
+        </div>
+        <div className="p-8">
+          <TableLoadingSkeleton />
+        </div>
       </div>
     );
   }
@@ -114,11 +87,8 @@ export const URLTable: React.FC = () => {
             <input
               type="text"
               placeholder="Search URLs or titles..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
+              value={pagination.search}
+              onChange={(e) => pagination.handleSearch(e.target.value)}
               className="pl-12 pr-4 py-3 w-full rounded-xl border border-gray-200 bg-white/80 backdrop-blur-sm focus:border-primary-400 focus:ring-4 focus:ring-primary-100 transition-all duration-200 placeholder-gray-500"
             />
           </div>
@@ -181,13 +151,13 @@ export const URLTable: React.FC = () => {
               </th>
               <th
                 className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors duration-200 rounded-lg"
-                onClick={() => handleSort("url")}
+                onClick={() => pagination.handleSort("url")}
               >
                 URL
               </th>
               <th
                 className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors duration-200 rounded-lg"
-                onClick={() => handleSort("title")}
+                onClick={() => pagination.handleSort("title")}
               >
                 Title
               </th>
@@ -205,7 +175,7 @@ export const URLTable: React.FC = () => {
               </th>
               <th
                 className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors duration-200 rounded-lg"
-                onClick={() => handleSort("created_at")}
+                onClick={() => pagination.handleSort("created_at")}
               >
                 Created
               </th>
@@ -360,25 +330,25 @@ export const URLTable: React.FC = () => {
       <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-8 py-6 border-t border-gray-200">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-sm font-medium text-gray-700">
-            Showing <span className="font-bold text-primary-600">{Math.min((page - 1) * limit + 1, total)}</span> to{" "}
-            <span className="font-bold text-primary-600">{Math.min(page * limit, total)}</span> of{" "}
+            Showing <span className="font-bold text-primary-600">{Math.min((pagination.page - 1) * pagination.limit + 1, total)}</span> to{" "}
+            <span className="font-bold text-primary-600">{Math.min(pagination.page * pagination.limit, total)}</span> of{" "}
             <span className="font-bold text-primary-600">{total}</span> results
           </div>
           <div className="flex items-center space-x-3">
             <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
+              onClick={() => pagination.prevPage()}
+              disabled={pagination.page === 1}
               className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 cursor-pointer"
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
               Previous
             </button>
             <span className="px-4 py-2 text-sm font-bold text-gray-700 bg-white rounded-lg border border-gray-300">
-              Page {page} of {totalPages}
+              Page {pagination.page} of {totalPages}
             </span>
             <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
+              onClick={() => pagination.nextPage(totalPages)}
+              disabled={pagination.page === totalPages}
               className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 cursor-pointer"
             >
               Next
@@ -389,4 +359,4 @@ export const URLTable: React.FC = () => {
       </div>
     </div>
   );
-};
+});

@@ -7,6 +7,8 @@ import type {
   URLListResponse,
   AddURLRequest,
   BulkActionRequest,
+  User,
+  PaginationParams,
 } from "../types";
 
 const API_BASE_URL =
@@ -43,18 +45,13 @@ export const authAPI = {
   login: (data: LoginRequest): Promise<AxiosResponse<AuthResponse>> =>
     api.post("/auth/login", data),
 
-  register: (data: RegisterRequest): Promise<AxiosResponse<{ user: any }>> =>
+  register: (data: RegisterRequest): Promise<AxiosResponse<{ user: User }>> =>
     api.post("/auth/register", data),
 };
 
 export const urlAPI = {
-  getAll: (params: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    sort_by?: string;
-    sort_order?: string;
-  }): Promise<AxiosResponse<URLListResponse>> => api.get("/urls", { params }),
+  getAll: (params: PaginationParams): Promise<AxiosResponse<URLListResponse>> => 
+    api.get("/urls", { params }),
 
   getById: (id: number): Promise<AxiosResponse<URL>> => api.get(`/urls/${id}`),
 
