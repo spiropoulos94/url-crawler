@@ -80,7 +80,7 @@ export const AddURL: React.FC = () => {
               <button
                 type="submit"
                 disabled={addUrlMutation.isPending || !url.trim()}
-                className="px-8 py-4 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3 min-w-[140px]"
+                className="px-8 py-4 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3 min-w-[140px] cursor-pointer"
               >
                 {addUrlMutation.isPending ? (
                   <>

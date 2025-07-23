@@ -128,7 +128,7 @@ export const URLTable: React.FC = () => {
               <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                 <button
                   onClick={() => handleBulkAction("start")}
-                  className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 bg-green-100 hover:bg-green-200 text-green-800 font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 text-sm"
+                  className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 bg-green-100 hover:bg-green-200 text-green-800 font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 text-sm cursor-pointer"
                   disabled={bulkActionMutation.isPending}
                 >
                   <Play className="h-4 w-4" />
@@ -136,7 +136,7 @@ export const URLTable: React.FC = () => {
                 </button>
                 <button
                   onClick={() => handleBulkAction("stop")}
-                  className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 text-sm"
+                  className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 text-sm cursor-pointer"
                   disabled={bulkActionMutation.isPending}
                 >
                   <Square className="h-4 w-4" />
@@ -144,7 +144,7 @@ export const URLTable: React.FC = () => {
                 </button>
                 <button
                   onClick={() => handleBulkAction("recrawl")}
-                  className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 text-sm"
+                  className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 text-sm cursor-pointer"
                   disabled={bulkActionMutation.isPending}
                 >
                   <RotateCcw className="h-4 w-4" />
@@ -152,7 +152,7 @@ export const URLTable: React.FC = () => {
                 </button>
                 <button
                   onClick={() => handleBulkAction("delete")}
-                  className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 bg-red-100 hover:bg-red-200 text-red-800 font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 text-sm"
+                  className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 bg-red-100 hover:bg-red-200 text-red-800 font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 text-sm cursor-pointer"
                   disabled={bulkActionMutation.isPending}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -269,7 +269,7 @@ export const URLTable: React.FC = () => {
                   <td className="px-6 py-4">
                     <button
                       onClick={() => navigate(`/url/${url.id}`)}
-                      className="p-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-all duration-200"
+                      className="p-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-all duration-200 cursor-pointer"
                       title="View details"
                     >
                       <Eye className="h-5 w-5" />
@@ -309,7 +309,7 @@ export const URLTable: React.FC = () => {
                 </div>
                 <button
                   onClick={() => navigate(`/url/${url.id}`)}
-                  className="p-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-all duration-200 flex-shrink-0"
+                  className="p-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-all duration-200 flex-shrink-0 cursor-pointer"
                   title="View details"
                 >
                   <Eye className="h-4 w-4" />
@@ -368,7 +368,7 @@ export const URLTable: React.FC = () => {
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 cursor-pointer"
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
               Previous
@@ -379,7 +379,7 @@ export const URLTable: React.FC = () => {
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 cursor-pointer"
             >
               Next
               <ChevronRight className="h-4 w-4 ml-1" />

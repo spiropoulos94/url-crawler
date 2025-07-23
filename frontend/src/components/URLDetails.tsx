@@ -94,7 +94,7 @@ export const URLDetails: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
         <button
           onClick={() => navigate('/dashboard')}
-          className="self-start px-4 sm:px-6 py-2 sm:py-3 bg-white hover:bg-gray-50 active:bg-gray-100 text-gray-700 font-semibold rounded-xl border border-gray-300 hover:border-gray-400 transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 flex items-center space-x-2"
+          className="self-start px-4 sm:px-6 py-2 sm:py-3 bg-white hover:bg-gray-50 active:bg-gray-100 text-gray-700 font-semibold rounded-xl border border-gray-300 hover:border-gray-400 transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 flex items-center space-x-2 cursor-pointer"
         >
           <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           <span className="text-sm sm:text-base">Back to Dashboard</span>

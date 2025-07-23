@@ -130,7 +130,7 @@ export const Login: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-4 bg-gradient-to-r from-primary-600 to-blue-600 hover:from-primary-700 hover:to-blue-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex justify-center items-center text-lg"
+              className="w-full py-4 bg-gradient-to-r from-primary-600 to-blue-600 hover:from-primary-700 hover:to-blue-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex justify-center items-center text-lg cursor-pointer"
             >
               {isLoading ? (
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
@@ -145,7 +145,7 @@ export const Login: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsRegisterMode(!isRegisterMode)}
-                className="text-primary-600 hover:text-primary-700 font-semibold transition-colors duration-200"
+                className="text-primary-600 hover:text-primary-700 font-semibold transition-colors duration-200 cursor-pointer"
                 disabled={isLoading}
               >
                 {isRegisterMode

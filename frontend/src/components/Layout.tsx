@@ -22,18 +22,22 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary-600 to-blue-600 bg-clip-text text-transparent truncate">
                   Sykell Web Crawler
                 </h1>
-                <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Advanced Website Analysis Tool</p>
+                <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">
+                  Advanced Website Analysis Tool
+                </p>
               </div>
             </div>
 
             <div className="flex items-center space-x-2 sm:space-x-6">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-gray-900">Welcome back!</p>
+                <p className="text-sm font-medium text-gray-900">
+                  Welcome back!
+                </p>
                 <p className="text-sm text-gray-600">{user?.username}</p>
               </div>
               <button
                 onClick={logout}
-                className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 group text-sm"
+                className="flex cursor-pointer items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 group text-sm"
               >
                 <LogOut className="h-4 w-4 sm:h-5 sm:w-5 group-hover:scale-110 transition-transform" />
                 <span className="font-medium hidden sm:inline">Logout</span>
@@ -44,9 +48,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       </nav>
 
       <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="space-y-8">
-          {children}
-        </div>
+        <div className="space-y-8">{children}</div>
       </main>
     </div>
   );
