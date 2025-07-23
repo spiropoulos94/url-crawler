@@ -1,4 +1,6 @@
-@tailwind base;
+@import "tailwindcss";
+
+/* @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -34,4 +36,4 @@
   .card {
     @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
   }
-}
+} */
