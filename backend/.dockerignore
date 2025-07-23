@@ -1,0 +1,14 @@
+*.log
+.DS_Store
+.env
+.env.local
+tmp/
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
