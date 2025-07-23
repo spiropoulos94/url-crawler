@@ -2,15 +2,8 @@ import React, { useState } from "react";
 import { useAuth } from "./providers/AuthProvider";
 import { Globe, AlertCircle } from "lucide-react";
 
-interface LoginProps {
-  onToggleMode: () => void;
-  isRegisterMode: boolean;
-}
-
-export const Login: React.FC<LoginProps> = ({
-  onToggleMode,
-  isRegisterMode,
-}) => {
+export const Login: React.FC = () => {
+  const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -44,7 +37,7 @@ export const Login: React.FC<LoginProps> = ({
         await register({ username: username.trim(), password });
         setError("");
         alert("Registration successful! Please log in.");
-        onToggleMode();
+        setIsRegisterMode(false);
       } else {
         await login({ username: username.trim(), password });
       }
@@ -151,7 +144,7 @@ export const Login: React.FC<LoginProps> = ({
             <div className="text-center pt-4">
               <button
                 type="button"
-                onClick={onToggleMode}
+                onClick={() => setIsRegisterMode(!isRegisterMode)}
                 className="text-primary-600 hover:text-primary-700 font-semibold transition-colors duration-200"
                 disabled={isLoading}
               >

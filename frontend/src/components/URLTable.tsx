@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { urlAPI } from "../services/api";
 import {
   Search,
@@ -13,10 +14,6 @@ import {
 } from "lucide-react";
 import type { URL, CrawlStatus } from "../types";
 
-interface URLTableProps {
-  onViewDetails: (url: URL) => void;
-}
-
 const statusColors: Record<CrawlStatus, string> = {
   queued: "bg-yellow-100 text-yellow-800",
   running: "bg-blue-100 text-blue-800",
@@ -24,7 +21,8 @@ const statusColors: Record<CrawlStatus, string> = {
   error: "bg-red-100 text-red-800",
 };
 
-export const URLTable: React.FC<URLTableProps> = ({ onViewDetails }) => {
+export const URLTable: React.FC = () => {
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -126,46 +124,48 @@ export const URLTable: React.FC<URLTableProps> = ({ onViewDetails }) => {
           </div>
 
           {selectedIds.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => handleBulkAction("start")}
-                className="flex items-center space-x-2 px-4 py-2 bg-green-100 hover:bg-green-200 text-green-800 font-medium rounded-lg transition-colors duration-200 disabled:opacity-50"
-                disabled={bulkActionMutation.isPending}
-              >
-                <Play className="h-4 w-4" />
-                <span>Start</span>
-              </button>
-              <button
-                onClick={() => handleBulkAction("stop")}
-                className="flex items-center space-x-2 px-4 py-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-medium rounded-lg transition-colors duration-200 disabled:opacity-50"
-                disabled={bulkActionMutation.isPending}
-              >
-                <Square className="h-4 w-4" />
-                <span>Stop</span>
-              </button>
-              <button
-                onClick={() => handleBulkAction("recrawl")}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium rounded-lg transition-colors duration-200 disabled:opacity-50"
-                disabled={bulkActionMutation.isPending}
-              >
-                <RotateCcw className="h-4 w-4" />
-                <span>Recrawl</span>
-              </button>
-              <button
-                onClick={() => handleBulkAction("delete")}
-                className="flex items-center space-x-2 px-4 py-2 bg-red-100 hover:bg-red-200 text-red-800 font-medium rounded-lg transition-colors duration-200 disabled:opacity-50"
-                disabled={bulkActionMutation.isPending}
-              >
-                <Trash2 className="h-4 w-4" />
-                <span>Delete</span>
-              </button>
+            <div className="w-full sm:w-auto">
+              <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+                <button
+                  onClick={() => handleBulkAction("start")}
+                  className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 bg-green-100 hover:bg-green-200 text-green-800 font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 text-sm"
+                  disabled={bulkActionMutation.isPending}
+                >
+                  <Play className="h-4 w-4" />
+                  <span className="hidden sm:inline">Start</span>
+                </button>
+                <button
+                  onClick={() => handleBulkAction("stop")}
+                  className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 text-sm"
+                  disabled={bulkActionMutation.isPending}
+                >
+                  <Square className="h-4 w-4" />
+                  <span className="hidden sm:inline">Stop</span>
+                </button>
+                <button
+                  onClick={() => handleBulkAction("recrawl")}
+                  className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 text-sm"
+                  disabled={bulkActionMutation.isPending}
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  <span className="hidden sm:inline">Recrawl</span>
+                </button>
+                <button
+                  onClick={() => handleBulkAction("delete")}
+                  className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 bg-red-100 hover:bg-red-200 text-red-800 font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 text-sm"
+                  disabled={bulkActionMutation.isPending}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Delete</span>
+                </button>
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
+      {/* Desktop Table - Hidden on mobile */}
+      <div className="hidden lg:block overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
             <tr>
@@ -268,7 +268,7 @@ export const URLTable: React.FC<URLTableProps> = ({ onViewDetails }) => {
                   </td>
                   <td className="px-6 py-4">
                     <button
-                      onClick={() => onViewDetails(url)}
+                      onClick={() => navigate(`/url/${url.id}`)}
                       className="p-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-all duration-200"
                       title="View details"
                     >
@@ -280,6 +280,80 @@ export const URLTable: React.FC<URLTableProps> = ({ onViewDetails }) => {
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card View - Shown only on mobile */}
+      <div className="lg:hidden space-y-4">
+        {urls.map((url: URL) => {
+          const latestResult = url.results?.[0];
+          return (
+            <div key={url.id} className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.includes(url.id)}
+                    onChange={(e) =>
+                      handleSelectUrl(url.id, e.target.checked)
+                    }
+                    className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 flex-shrink-0 mt-1"
+                  />
+                  <div className="flex-1">
+                    <div className="font-medium text-gray-900 truncate text-sm" title={url.title || latestResult?.title || "-"}>
+                      {url.title || latestResult?.title || "-"}
+                    </div>
+                    <div className="text-xs text-gray-500 truncate mt-1" title={url.url}>
+                      {url.url}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate(`/url/${url.id}`)}
+                  className="p-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-all duration-200 flex-shrink-0"
+                  title="View details"
+                >
+                  <Eye className="h-4 w-4" />
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div className="text-center">
+                  <span
+                    className={`inline-flex items-center px-2 py-1 text-xs font-bold rounded-full shadow-sm ${
+                      statusColors[url.status]
+                    }`}
+                  >
+                    {url.status}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-600 text-right">
+                  {new Date(url.created_at).toLocaleDateString()}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">Internal</div>
+                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold">
+                    {latestResult?.internal_links ?? "-"}
+                  </span>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">External</div>
+                  <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
+                    {latestResult?.external_links ?? "-"}
+                  </span>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">Broken</div>
+                  <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-semibold">
+                    {latestResult?.broken_links ?? "-"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Pagination */}

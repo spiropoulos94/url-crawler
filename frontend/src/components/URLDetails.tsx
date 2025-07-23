@@ -1,5 +1,6 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useParams, useNavigate } from "react-router-dom";
 import { urlAPI } from "../services/api";
 import {
   ArrowLeft,
@@ -23,16 +24,24 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-interface URLDetailsProps {
-  urlId: number;
-  onBack: () => void;
-}
+export const URLDetails: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const urlId = parseInt(id || '0', 10);
 
-export const URLDetails: React.FC<URLDetailsProps> = ({ urlId, onBack }) => {
   const { data, isLoading, error } = useQuery({
     queryKey: ["url", urlId],
     queryFn: () => urlAPI.getById(urlId),
+    enabled: !!(id && !isNaN(urlId)),
   });
+
+  if (!id || isNaN(urlId)) {
+    return (
+      <div className="text-center text-red-600 p-4">
+        Invalid URL ID. Please check the URL and try again.
+      </div>
+    );
+  }
 
   const url = data?.data;
   const result = url?.results?.[0];
@@ -80,23 +89,23 @@ export const URLDetails: React.FC<URLDetailsProps> = ({ urlId, onBack }) => {
     : [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center space-x-4">
+      <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
         <button
-          onClick={onBack}
-          className="btn-secondary flex items-center space-x-2"
+          onClick={() => navigate('/dashboard')}
+          className="self-start px-4 sm:px-6 py-2 sm:py-3 bg-white hover:bg-gray-50 active:bg-gray-100 text-gray-700 font-semibold rounded-xl border border-gray-300 hover:border-gray-400 transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 flex items-center space-x-2"
         >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Back to Dashboard</span>
+          <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+          <span className="text-sm sm:text-base">Back to Dashboard</span>
         </button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
             {url.title || "URL Details"}
           </h1>
           <div className="flex items-center space-x-2 mt-1">
-            <Globe className="h-4 w-4 text-gray-500" />
-            <span className="text-sm text-gray-600">{url.url}</span>
+            <Globe className="h-4 w-4 text-gray-500 flex-shrink-0" />
+            <span className="text-sm text-gray-600 truncate">{url.url}</span>
           </div>
         </div>
       </div>
@@ -189,24 +198,25 @@ export const URLDetails: React.FC<URLDetailsProps> = ({ urlId, onBack }) => {
           </div>
 
           {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6">
             {/* Links Distribution */}
             <div className="card">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Links Distribution
               </h3>
               {linkData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
                   <PieChart>
                     <Pie
                       data={linkData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={60}
-                      outerRadius={120}
+                      innerRadius={40}
+                      outerRadius={80}
                       paddingAngle={5}
                       dataKey="value"
                       label={({ name, value }) => `${name}: ${value}`}
+                      labelLine={false}
                     >
                       {linkData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
@@ -228,11 +238,11 @@ export const URLDetails: React.FC<URLDetailsProps> = ({ urlId, onBack }) => {
                 Heading Distribution
               </h3>
               {headingData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={headingData}>
+                <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
+                  <BarChart data={headingData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="level" />
-                    <YAxis />
+                    <XAxis dataKey="level" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
                     <Tooltip />
                     <Bar dataKey="count" fill="#3b82f6" />
                   </BarChart>
@@ -251,7 +261,9 @@ export const URLDetails: React.FC<URLDetailsProps> = ({ urlId, onBack }) => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Broken Links
               </h3>
-              <div className="overflow-x-auto">
+              
+              {/* Desktop Table */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
@@ -284,6 +296,29 @@ export const URLDetails: React.FC<URLDetailsProps> = ({ urlId, onBack }) => {
                     ))}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-3">
+                {result.broken_urls.map((brokenUrl) => (
+                  <div key={brokenUrl.id} className="border border-gray-200 rounded-lg p-4 bg-red-50">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-gray-900 truncate" title={brokenUrl.url}>
+                          {brokenUrl.url}
+                        </div>
+                      </div>
+                      <span className="ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 flex-shrink-0">
+                        {brokenUrl.status_code}
+                      </span>
+                    </div>
+                    {brokenUrl.error_message && (
+                      <div className="text-sm text-gray-600">
+                        <span className="font-medium">Error:</span> {brokenUrl.error_message}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           )}

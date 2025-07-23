@@ -1,12 +1,10 @@
-import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { Login } from "./components/Login";
-import { AddURL } from "./components/AddURL";
-import { URLTable } from "./components/URLTable";
+import { Dashboard } from "./components/Dashboard";
 import { URLDetails } from "./components/URLDetails";
 import { AuthProvider, useAuth } from "./components/providers/AuthProvider";
-import type { URL } from "./types";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,55 +15,80 @@ const queryClient = new QueryClient({
   },
 });
 
-function AppContent() {
+// Protected Route component
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
-  const [isRegisterMode, setIsRegisterMode] = useState(false);
-  const [selectedUrl, setSelectedUrl] = useState<URL | null>(null);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-blue-50 to-indigo-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Loading...</p>
+        </div>
       </div>
     );
   }
 
   if (!user) {
-    return (
-      <Login
-        onToggleMode={() => setIsRegisterMode(!isRegisterMode)}
-        isRegisterMode={isRegisterMode}
-      />
-    );
+    return <Navigate to="/login" replace />;
   }
 
-  if (selectedUrl) {
-    return (
-      <Layout>
-        <URLDetails
-          urlId={selectedUrl.id}
-          onBack={() => setSelectedUrl(null)}
-        />
-      </Layout>
-    );
-  }
+  return <Layout>{children}</Layout>;
+}
+
+// App Routes component
+function AppRoutes() {
+  const { user } = useAuth();
 
   return (
-    <Layout>
-      <div className="space-y-6">
-        <AddURL />
-        <URLTable onViewDetails={setSelectedUrl} />
-      </div>
-    </Layout>
+    <Routes>
+      {/* Public routes */}
+      <Route 
+        path="/login" 
+        element={user ? <Navigate to="/" replace /> : <Login />} 
+      />
+      
+      {/* Protected routes */}
+      <Route 
+        path="/" 
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/dashboard" 
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/url/:id" 
+        element={
+          <ProtectedRoute>
+            <URLDetails />
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* Catch all route */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </BrowserRouter>
     </QueryClientProvider>
   );
 }
