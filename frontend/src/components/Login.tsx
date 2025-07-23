@@ -1,52 +1,58 @@
-import React, { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { Globe, AlertCircle } from 'lucide-react';
+import React, { useState } from "react";
+import { useAuth } from "./providers/AuthProvider";
+import { Globe, AlertCircle } from "lucide-react";
 
 interface LoginProps {
   onToggleMode: () => void;
   isRegisterMode: boolean;
 }
 
-export const Login: React.FC<LoginProps> = ({ onToggleMode, isRegisterMode }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+export const Login: React.FC<LoginProps> = ({
+  onToggleMode,
+  isRegisterMode,
+}) => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { login, register } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!username.trim() || !password.trim()) {
-      setError('Username and password are required');
+      setError("Username and password are required");
       return;
     }
 
     if (isRegisterMode && password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError("Password must be at least 6 characters long");
       return;
     }
 
     if (isRegisterMode && username.length < 3) {
-      setError('Username must be at least 3 characters long');
+      setError("Username must be at least 3 characters long");
       return;
     }
 
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       if (isRegisterMode) {
         await register({ username: username.trim(), password });
-        setError('');
-        alert('Registration successful! Please log in.');
+        setError("");
+        alert("Registration successful! Please log in.");
         onToggleMode();
       } else {
         await login({ username: username.trim(), password });
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || `${isRegisterMode ? 'Registration' : 'Login'} failed`);
+      setError(
+        err.response?.data?.error ||
+          `${isRegisterMode ? "Registration" : "Login"} failed`
+      );
     } finally {
       setIsLoading(false);
     }
@@ -60,7 +66,7 @@ export const Login: React.FC<LoginProps> = ({ onToggleMode, isRegisterMode }) =>
             <Globe className="h-12 w-12 text-primary-600" />
           </div>
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            {isRegisterMode ? 'Create your account' : 'Sign in to your account'}
+            {isRegisterMode ? "Create your account" : "Sign in to your account"}
           </h2>
           <p className="mt-2 text-sm text-gray-600">
             Sykell Web Crawler Dashboard
@@ -70,7 +76,10 @@ export const Login: React.FC<LoginProps> = ({ onToggleMode, isRegisterMode }) =>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Username
               </label>
               <input
@@ -81,7 +90,7 @@ export const Login: React.FC<LoginProps> = ({ onToggleMode, isRegisterMode }) =>
                 value={username}
                 onChange={(e) => {
                   setUsername(e.target.value);
-                  if (error) setError('');
+                  if (error) setError("");
                 }}
                 className="input-field mt-1"
                 placeholder="Enter your username"
@@ -90,7 +99,10 @@ export const Login: React.FC<LoginProps> = ({ onToggleMode, isRegisterMode }) =>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <input
@@ -101,7 +113,7 @@ export const Login: React.FC<LoginProps> = ({ onToggleMode, isRegisterMode }) =>
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
-                  if (error) setError('');
+                  if (error) setError("");
                 }}
                 className="input-field mt-1"
                 placeholder="Enter your password"
@@ -125,8 +137,10 @@ export const Login: React.FC<LoginProps> = ({ onToggleMode, isRegisterMode }) =>
             >
               {isLoading ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              ) : isRegisterMode ? (
+                "Create Account"
               ) : (
-                isRegisterMode ? 'Create Account' : 'Sign In'
+                "Sign In"
               )}
             </button>
           </div>
@@ -138,10 +152,9 @@ export const Login: React.FC<LoginProps> = ({ onToggleMode, isRegisterMode }) =>
               className="text-sm text-primary-600 hover:text-primary-700 font-medium"
               disabled={isLoading}
             >
-              {isRegisterMode 
-                ? 'Already have an account? Sign in' 
-                : "Don't have an account? Create one"
-              }
+              {isRegisterMode
+                ? "Already have an account? Sign in"
+                : "Don't have an account? Create one"}
             </button>
           </div>
         </form>

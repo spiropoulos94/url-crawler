@@ -1,38 +1,40 @@
-import React, { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { urlAPI } from '../services/api';
-import { Plus, AlertCircle } from 'lucide-react';
+import React, { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { urlAPI } from "../services/api";
+import { Plus, AlertCircle } from "lucide-react";
+import type { AxiosError } from "axios";
 
 export const AddURL: React.FC = () => {
-  const [url, setUrl] = useState('');
-  const [error, setError] = useState('');
+  const [url, setUrl] = useState("");
+  const [error, setError] = useState("");
   const queryClient = useQueryClient();
 
   const addUrlMutation = useMutation({
     mutationFn: urlAPI.add,
     onSuccess: () => {
-      queryClient.invalidateQueries(['urls']);
-      setUrl('');
-      setError('');
+      queryClient.invalidateQueries({ queryKey: ["urls"] });
+      setUrl("");
+      setError("");
     },
-    onError: (error: any) => {
-      setError(error.response?.data?.error || 'Failed to add URL');
+    onError: (error) => {
+      const axiosError = error as AxiosError<{ error: string }>;
+      setError(axiosError.response?.data?.error || "Failed to add URL");
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!url.trim()) {
-      setError('URL is required');
+      setError("URL is required");
       return;
     }
 
     // Basic URL validation
     try {
-      new URL(url.startsWith('http') ? url : `https://${url}`);
+      new URL(url.startsWith("http") ? url : `https://${url}`);
     } catch {
-      setError('Please enter a valid URL');
+      setError("Please enter a valid URL");
       return;
     }
 
@@ -42,10 +44,13 @@ export const AddURL: React.FC = () => {
   return (
     <div className="card">
       <h2 className="text-lg font-semibold text-gray-900 mb-4">Add New URL</h2>
-      
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="url"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Website URL
           </label>
           <div className="flex space-x-2">
@@ -55,18 +60,18 @@ export const AddURL: React.FC = () => {
               value={url}
               onChange={(e) => {
                 setUrl(e.target.value);
-                if (error) setError('');
+                if (error) setError("");
               }}
               placeholder="https://example.com"
               className="input-field flex-1"
-              disabled={addUrlMutation.isLoading}
+              disabled={addUrlMutation.isPending}
             />
             <button
               type="submit"
-              disabled={addUrlMutation.isLoading}
+              disabled={addUrlMutation.isPending}
               className="btn-primary flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {addUrlMutation.isLoading ? (
+              {addUrlMutation.isPending ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
               ) : (
                 <Plus className="h-4 w-4" />

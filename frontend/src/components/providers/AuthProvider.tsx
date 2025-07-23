@@ -1,12 +1,6 @@
-import {
-  useState,
-  useEffect,
-  createContext,
-  useContext,
-  ReactNode,
-} from "react";
-import { authAPI } from "../services/api";
-import type { User, LoginRequest, RegisterRequest } from "../types";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import type { User, LoginRequest, RegisterRequest } from "../../types";
+import { authAPI } from "../../services/api";
 
 interface AuthContextType {
   user: User | null;
@@ -27,7 +21,7 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,25 +38,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (data: LoginRequest) => {
-    try {
-      const response = await authAPI.login(data);
-      const { token: newToken, user: newUser } = response.data;
+    const response = await authAPI.login(data);
+    const { token: newToken, user: newUser } = response.data;
 
-      setToken(newToken);
-      setUser(newUser);
-      localStorage.setItem("token", newToken);
-      localStorage.setItem("user", JSON.stringify(newUser));
-    } catch (error) {
-      throw error;
-    }
+    setToken(newToken);
+    setUser(newUser);
+    localStorage.setItem("token", newToken);
+    localStorage.setItem("user", JSON.stringify(newUser));
   };
 
   const register = async (data: RegisterRequest) => {
-    try {
-      await authAPI.register(data);
-    } catch (error) {
-      throw error;
-    }
+    await authAPI.register(data);
   };
 
   const logout = () => {

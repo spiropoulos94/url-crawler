@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Layout } from "./components/Layout";
 import { Login } from "./components/Login";
 import { AddURL } from "./components/AddURL";
 import { URLTable } from "./components/URLTable";
 import { URLDetails } from "./components/URLDetails";
-import { URL } from "./types";
-import { useAuth } from "./components/providers/AuthProvider";
+import { AuthProvider, useAuth } from "./components/providers/AuthProvider";
+import type { URL } from "./types";
 
 const queryClient = new QueryClient({
   defaultOptions: {

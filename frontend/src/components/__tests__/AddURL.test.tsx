@@ -1,11 +1,13 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AddURL } from '../AddURL';
-import { urlAPI } from '../../services/api';
+import React from "react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AddURL } from "../AddURL";
+import { urlAPI } from "../../services/api";
+import type { AxiosResponse } from "axios";
+import type { URL } from "../../types";
 
 // Mock the API
-jest.mock('../../services/api', () => ({
+jest.mock("../../services/api", () => ({
   urlAPI: {
     add: jest.fn(),
   },
@@ -25,73 +27,89 @@ const createWrapper = () => {
   );
 };
 
-describe('AddURL Component', () => {
+describe("AddURL Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders the form correctly', () => {
+  it("renders the form correctly", () => {
     render(<AddURL />, { wrapper: createWrapper() });
-    
-    expect(screen.getByText('Add New URL')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('https://example.com')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /add url/i })).toBeInTheDocument();
+
+    expect(screen.getByText("Add New URL")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("https://example.com")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /add url/i })
+    ).toBeInTheDocument();
   });
 
-  it('validates empty URL input', async () => {
+  it("validates empty URL input", async () => {
     render(<AddURL />, { wrapper: createWrapper() });
-    
-    const submitButton = screen.getByRole('button', { name: /add url/i });
+
+    const submitButton = screen.getByRole("button", { name: /add url/i });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('URL is required')).toBeInTheDocument();
+      expect(screen.getByText("URL is required")).toBeInTheDocument();
     });
   });
 
-  it('validates invalid URL format', async () => {
+  it("validates invalid URL format", async () => {
     render(<AddURL />, { wrapper: createWrapper() });
-    
-    const input = screen.getByPlaceholderText('https://example.com');
-    const submitButton = screen.getByRole('button', { name: /add url/i });
-    
-    fireEvent.change(input, { target: { value: 'invalid-url' } });
+
+    const input = screen.getByPlaceholderText("https://example.com");
+    const submitButton = screen.getByRole("button", { name: /add url/i });
+
+    fireEvent.change(input, { target: { value: "invalid-url" } });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Please enter a valid URL')).toBeInTheDocument();
+      expect(screen.getByText("Please enter a valid URL")).toBeInTheDocument();
     });
   });
 
-  it('successfully submits a valid URL', async () => {
-    const mockResponse = {
+  it("successfully submits a valid URL", async () => {
+    const mockResponse: AxiosResponse<URL> = {
       data: {
         id: 1,
-        url: 'https://example.com',
-        status: 'queued',
+        url: "https://example.com",
+        title: "",
+        status: "queued",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       },
-    };
+      status: 201,
+      statusText: "Created",
+      headers: {},
+      config: {
+        headers: undefined,
+      },
+      request: {},
+    } as AxiosResponse<URL>;
 
     mockUrlAPI.add.mockResolvedValueOnce(mockResponse);
 
     render(<AddURL />, { wrapper: createWrapper() });
-    
-    const input = screen.getByPlaceholderText('https://example.com');
-    const submitButton = screen.getByRole('button', { name: /add url/i });
-    
-    fireEvent.change(input, { target: { value: 'https://example.com' } });
+
+    const input = screen.getByPlaceholderText("https://example.com");
+    const submitButton = screen.getByRole("button", { name: /add url/i });
+
+    fireEvent.change(input, { target: { value: "https://example.com" } });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockUrlAPI.add).toHaveBeenCalledWith({ url: 'https://example.com' });
+      expect(mockUrlAPI.add).toHaveBeenCalledWith({
+        url: "https://example.com",
+      });
     });
   });
 
-  it('handles API errors gracefully', async () => {
+  it("handles API errors gracefully", async () => {
     const errorResponse = {
       response: {
         data: {
-          error: 'URL already exists',
+          error: "URL already exists",
         },
       },
     };
@@ -99,34 +117,34 @@ describe('AddURL Component', () => {
     mockUrlAPI.add.mockRejectedValueOnce(errorResponse);
 
     render(<AddURL />, { wrapper: createWrapper() });
-    
-    const input = screen.getByPlaceholderText('https://example.com');
-    const submitButton = screen.getByRole('button', { name: /add url/i });
-    
-    fireEvent.change(input, { target: { value: 'https://example.com' } });
+
+    const input = screen.getByPlaceholderText("https://example.com");
+    const submitButton = screen.getByRole("button", { name: /add url/i });
+
+    fireEvent.change(input, { target: { value: "https://example.com" } });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('URL already exists')).toBeInTheDocument();
+      expect(screen.getByText("URL already exists")).toBeInTheDocument();
     });
   });
 
-  it('clears error when user starts typing again', async () => {
+  it("clears error when user starts typing again", async () => {
     render(<AddURL />, { wrapper: createWrapper() });
-    
-    const input = screen.getByPlaceholderText('https://example.com');
-    const submitButton = screen.getByRole('button', { name: /add url/i });
-    
+
+    const input = screen.getByPlaceholderText("https://example.com");
+    const submitButton = screen.getByRole("button", { name: /add url/i });
+
     // Trigger validation error
     fireEvent.click(submitButton);
-    
+
     await waitFor(() => {
-      expect(screen.getByText('URL is required')).toBeInTheDocument();
+      expect(screen.getByText("URL is required")).toBeInTheDocument();
     });
 
     // Start typing to clear error
-    fireEvent.change(input, { target: { value: 'h' } });
-    
-    expect(screen.queryByText('URL is required')).not.toBeInTheDocument();
+    fireEvent.change(input, { target: { value: "h" } });
+
+    expect(screen.queryByText("URL is required")).not.toBeInTheDocument();
   });
 });

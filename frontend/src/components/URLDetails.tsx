@@ -1,17 +1,27 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { urlAPI } from '../services/api';
-import { URL } from '../types';
-import { 
-  ArrowLeft, 
-  Globe, 
-  Hash, 
-  ExternalLink, 
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { urlAPI } from "../services/api";
+import {
+  ArrowLeft,
+  Globe,
+  Hash,
+  ExternalLink,
   AlertTriangle,
   CheckCircle,
-  XCircle 
-} from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+  XCircle,
+} from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+} from "recharts";
 
 interface URLDetailsProps {
   urlId: number;
@@ -20,7 +30,7 @@ interface URLDetailsProps {
 
 export const URLDetails: React.FC<URLDetailsProps> = ({ urlId, onBack }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: ['url', urlId],
+    queryKey: ["url", urlId],
     queryFn: () => urlAPI.getById(urlId),
   });
 
@@ -43,19 +53,31 @@ export const URLDetails: React.FC<URLDetailsProps> = ({ urlId, onBack }) => {
     );
   }
 
-  const linkData = result ? [
-    { name: 'Internal Links', value: result.internal_links, color: '#3b82f6' },
-    { name: 'External Links', value: result.external_links, color: '#10b981' },
-  ] : [];
+  const linkData = result
+    ? [
+        {
+          name: "Internal Links",
+          value: result.internal_links,
+          color: "#3b82f6",
+        },
+        {
+          name: "External Links",
+          value: result.external_links,
+          color: "#10b981",
+        },
+      ]
+    : [];
 
-  const headingData = result ? [
-    { level: 'H1', count: result.h1_count },
-    { level: 'H2', count: result.h2_count },
-    { level: 'H3', count: result.h3_count },
-    { level: 'H4', count: result.h4_count },
-    { level: 'H5', count: result.h5_count },
-    { level: 'H6', count: result.h6_count },
-  ].filter(item => item.count > 0) : [];
+  const headingData = result
+    ? [
+        { level: "H1", count: result.h1_count },
+        { level: "H2", count: result.h2_count },
+        { level: "H3", count: result.h3_count },
+        { level: "H4", count: result.h4_count },
+        { level: "H5", count: result.h5_count },
+        { level: "H6", count: result.h6_count },
+      ].filter((item) => item.count > 0)
+    : [];
 
   return (
     <div className="space-y-6">
@@ -69,7 +91,9 @@ export const URLDetails: React.FC<URLDetailsProps> = ({ urlId, onBack }) => {
           <span>Back to Dashboard</span>
         </button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">{url.title || 'URL Details'}</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {url.title || "URL Details"}
+          </h1>
           <div className="flex items-center space-x-2 mt-1">
             <Globe className="h-4 w-4 text-gray-500" />
             <span className="text-sm text-gray-600">{url.url}</span>
@@ -80,8 +104,12 @@ export const URLDetails: React.FC<URLDetailsProps> = ({ urlId, onBack }) => {
       {!result ? (
         <div className="card text-center py-8">
           <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No Analysis Available</h3>
-          <p className="text-gray-600">This URL hasn't been crawled yet or the crawl failed.</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No Analysis Available
+          </h3>
+          <p className="text-gray-600">
+            This URL hasn't been crawled yet or the crawl failed.
+          </p>
         </div>
       ) : (
         <>
@@ -93,8 +121,12 @@ export const URLDetails: React.FC<URLDetailsProps> = ({ urlId, onBack }) => {
                   <Hash className="h-8 w-8 text-blue-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">HTML Version</p>
-                  <p className="text-lg font-semibold text-gray-900">{result.html_version}</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    HTML Version
+                  </p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {result.html_version}
+                  </p>
                 </div>
               </div>
             </div>
@@ -105,7 +137,9 @@ export const URLDetails: React.FC<URLDetailsProps> = ({ urlId, onBack }) => {
                   <ExternalLink className="h-8 w-8 text-green-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Total Links</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Total Links
+                  </p>
                   <p className="text-lg font-semibold text-gray-900">
                     {result.internal_links + result.external_links}
                   </p>
@@ -116,11 +150,19 @@ export const URLDetails: React.FC<URLDetailsProps> = ({ urlId, onBack }) => {
             <div className="card">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <AlertTriangle className={`h-8 w-8 ${result.broken_links > 0 ? 'text-red-600' : 'text-gray-400'}`} />
+                  <AlertTriangle
+                    className={`h-8 w-8 ${
+                      result.broken_links > 0 ? "text-red-600" : "text-gray-400"
+                    }`}
+                  />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Broken Links</p>
-                  <p className="text-lg font-semibold text-gray-900">{result.broken_links}</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Broken Links
+                  </p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {result.broken_links}
+                  </p>
                 </div>
               </div>
             </div>
@@ -135,9 +177,11 @@ export const URLDetails: React.FC<URLDetailsProps> = ({ urlId, onBack }) => {
                   )}
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Login Form</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Login Form
+                  </p>
                   <p className="text-lg font-semibold text-gray-900">
-                    {result.has_login_form ? 'Present' : 'Not Found'}
+                    {result.has_login_form ? "Present" : "Not Found"}
                   </p>
                 </div>
               </div>
@@ -148,7 +192,9 @@ export const URLDetails: React.FC<URLDetailsProps> = ({ urlId, onBack }) => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Links Distribution */}
             <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Links Distribution</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Links Distribution
+              </h3>
               {linkData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
@@ -170,13 +216,17 @@ export const URLDetails: React.FC<URLDetailsProps> = ({ urlId, onBack }) => {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="text-gray-500 text-center py-8">No link data available</p>
+                <p className="text-gray-500 text-center py-8">
+                  No link data available
+                </p>
               )}
             </div>
 
             {/* Heading Distribution */}
             <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Heading Distribution</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Heading Distribution
+              </h3>
               {headingData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={headingData}>
@@ -188,7 +238,9 @@ export const URLDetails: React.FC<URLDetailsProps> = ({ urlId, onBack }) => {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="text-gray-500 text-center py-8">No heading data available</p>
+                <p className="text-gray-500 text-center py-8">
+                  No heading data available
+                </p>
               )}
             </div>
           </div>
@@ -196,7 +248,9 @@ export const URLDetails: React.FC<URLDetailsProps> = ({ urlId, onBack }) => {
           {/* Broken Links */}
           {result.broken_urls && result.broken_urls.length > 0 && (
             <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Broken Links</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Broken Links
+              </h3>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -224,7 +278,7 @@ export const URLDetails: React.FC<URLDetailsProps> = ({ urlId, onBack }) => {
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
-                          {brokenUrl.error_message || '-'}
+                          {brokenUrl.error_message || "-"}
                         </td>
                       </tr>
                     ))}

@@ -1,6 +1,6 @@
-import React from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { LogOut, Globe } from 'lucide-react';
+import React from "react";
+import { useAuth } from "./providers/AuthProvider";
+import { LogOut, Globe } from "lucide-react";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -20,7 +20,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 Sykell Web Crawler
               </h1>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">
                 Welcome, {user?.username}
@@ -36,7 +36,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         </div>
       </nav>
-      
+
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {children}
       </main>
