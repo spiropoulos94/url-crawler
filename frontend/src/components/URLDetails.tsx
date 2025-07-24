@@ -137,12 +137,11 @@ export const URLDetails: React.FC = React.memo(() => {
         {/* Error Message */}
         {url.status === 'error' && url.error_message && (
           <div className="mt-3">
-            <Alert variant="danger" className="text-sm">
-              <AlertTriangle className="h-4 w-4" />
-              <div>
-                <strong>Error:</strong> {url.error_message}
-              </div>
-            </Alert>
+            <Alert 
+              type="error" 
+              message={`Error: ${url.error_message}`}
+              className="text-sm"
+            />
           </div>
         )}
       </div>
