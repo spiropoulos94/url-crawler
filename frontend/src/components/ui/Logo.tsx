@@ -27,13 +27,13 @@ export const Logo: React.FC<LogoProps> = ({
   return (
     <div className={`flex items-center space-x-2 sm:space-x-3 ${className}`}>
       <div
-        className={`${containerSizes[size]} bg-gradient-to-r from-primary-500 to-blue-600 rounded-lg shadow-lg`}
+        className={`${containerSizes[size]} bg-blue-500 rounded-lg shadow-lg`}
       >
         <Globe className={`${sizes[size]} text-white`} />
       </div>
       {showText && (
         <div className="min-w-0">
-          <h1 className="text-base sm:text-lg font-bold bg-gradient-to-r from-primary-600 to-blue-600 bg-clip-text text-transparent truncate">
+          <h1 className="text-base sm:text-lg font-bold bg-blue-500 bg-clip-text text-transparent truncate">
             Sykell Web Crawler
           </h1>
           <p className="text-xs text-gray-600 hidden sm:block">

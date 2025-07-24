@@ -35,6 +35,7 @@ export const URLTableHeader: React.FC<URLTableHeaderProps> = ({
             value={searchValue}
             onChange={onSearchChange}
             placeholder="Search URLs or titles..."
+            className="w-full  md:max-w-md"
           />
 
           {showClearSort && (
