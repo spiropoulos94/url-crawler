@@ -45,7 +45,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
       )}
 
       {showRetry && onRetry && (
-        <Button onClick={onRetry} icon={RefreshCw} variant="primary">
+        <Button onClick={onRetry} icon={RefreshCw} variant="secondary">
           Try Again
         </Button>
       )}
