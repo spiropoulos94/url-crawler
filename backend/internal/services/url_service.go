@@ -3,9 +3,9 @@ package services
 import (
 	"errors"
 	"net/url"
+	"strings"
 	"sykell-crawler/internal/models"
 	"sykell-crawler/internal/repositories"
-	"strings"
 
 	"gorm.io/gorm"
 )
@@ -54,17 +54,17 @@ func (s *urlService) AddURL(urlStr string) (*models.URL, error) {
 		if err := s.urlRepo.RestoreURL(existingDeleted.ID); err != nil {
 			return nil, err
 		}
-		
+
 		// Update status and enqueue
 		if err := s.urlRepo.UpdateStatus(existingDeleted.ID, models.StatusQueued); err != nil {
 			return nil, err
 		}
-		
+
 		if err := s.queue.EnqueueCrawlJob(existingDeleted.ID); err != nil {
 			s.urlRepo.UpdateStatus(existingDeleted.ID, models.StatusError)
 			return nil, err
 		}
-		
+
 		// Return the restored URL
 		return s.urlRepo.GetByID(existingDeleted.ID)
 	}
@@ -93,7 +93,7 @@ func (s *urlService) GetURL(id uint) (*models.URL, error) {
 
 func (s *urlService) GetAllURLs(page, pageSize int, search, sortBy, sortOrder string) ([]*models.URL, int64, error) {
 	offset := (page - 1) * pageSize
-	return s.urlRepo.GetAll(offset, pageSize, search)
+	return s.urlRepo.GetAll(offset, pageSize, search, sortBy, sortOrder)
 }
 
 func (s *urlService) StartCrawling(ids []uint) error {

@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"strings"
 	"sykell-crawler/internal/models"
 
 	"gorm.io/gorm"
@@ -12,7 +13,7 @@ type URLRepository interface {
 	GetByURL(url string) (*models.URL, error)
 	GetDeletedByURL(url string) (*models.URL, error)
 	RestoreURL(id uint) error
-	GetAll(offset, limit int, search string) ([]*models.URL, int64, error)
+	GetAll(offset, limit int, search, sortBy, sortOrder string) ([]*models.URL, int64, error)
 	Update(url *models.URL) error
 	Delete(id uint) error
 	UpdateStatus(id uint, status models.CrawlStatus) error
@@ -62,12 +63,12 @@ func (r *urlRepository) RestoreURL(id uint) error {
 	return r.db.Unscoped().Model(&models.URL{}).Where("id = ?", id).Update("deleted_at", nil).Error
 }
 
-func (r *urlRepository) GetAll(offset, limit int, search string) ([]*models.URL, int64, error) {
+func (r *urlRepository) GetAll(offset, limit int, search, sortBy, sortOrder string) ([]*models.URL, int64, error) {
 	var urls []*models.URL
 	var total int64
 
 	query := r.db.Model(&models.URL{})
-	
+
 	if search != "" {
 		query = query.Where("url LIKE ? OR title LIKE ?", "%"+search+"%", "%"+search+"%")
 	}
@@ -76,13 +77,39 @@ func (r *urlRepository) GetAll(offset, limit int, search string) ([]*models.URL,
 		return nil, 0, err
 	}
 
+	// Build order clause
+	orderClause := r.buildOrderClause(sortBy, sortOrder)
+
 	err := query.Preload("Results").
 		Offset(offset).
 		Limit(limit).
-		Order("created_at DESC").
+		Order(orderClause).
 		Find(&urls).Error
 
 	return urls, total, err
+}
+
+func (r *urlRepository) buildOrderClause(sortBy, sortOrder string) string {
+	// Validate sortBy field
+	allowedFields := map[string]string{
+		"url":        "url",
+		"title":      "title",
+		"status":     "status",
+		"created_at": "created_at",
+		"updated_at": "updated_at",
+	}
+
+	field, exists := allowedFields[sortBy]
+	if !exists {
+		field = "created_at" // default
+	}
+
+	// Validate sortOrder
+	if sortOrder != "asc" && sortOrder != "desc" {
+		sortOrder = "desc" // default
+	}
+
+	return field + " " + strings.ToUpper(sortOrder)
 }
 
 func (r *urlRepository) Update(url *models.URL) error {
