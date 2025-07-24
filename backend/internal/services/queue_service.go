@@ -14,6 +14,7 @@ type QueueService interface {
 	EnqueueCrawlJob(urlID uint) error
 	ProcessCrawlJobs(ctx context.Context, crawlerService CrawlerService) error
 	CancelCrawlJob(urlID uint) error
+	ClearCancellation(urlID uint) error
 	IsCancelled(urlID uint) (bool, error)
 }
 
@@ -91,6 +92,11 @@ func (s *queueService) ProcessCrawlJobs(ctx context.Context, crawlerService Craw
 func (s *queueService) CancelCrawlJob(urlID uint) error {
 	key := fmt.Sprintf("cancelled_job:%d", urlID)
 	return s.redis.Set(context.Background(), key, "true", 30*time.Minute).Err()
+}
+
+func (s *queueService) ClearCancellation(urlID uint) error {
+	key := fmt.Sprintf("cancelled_job:%d", urlID)
+	return s.redis.Del(context.Background(), key).Err()
 }
 
 func (s *queueService) IsCancelled(urlID uint) (bool, error) {

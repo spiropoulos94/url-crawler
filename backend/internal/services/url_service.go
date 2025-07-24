@@ -125,13 +125,13 @@ func (s *urlService) StopCrawling(ids []uint) error {
 		if err := s.queue.CancelCrawlJob(id); err != nil {
 			return err
 		}
-		
+
 		// Get URL and clear error message when stopping
 		url, err := s.urlRepo.GetByID(id)
 		if err != nil {
 			return err
 		}
-		
+
 		url.Status = models.StatusStopped
 		url.ErrorMessage = "" // Clear any previous error message
 		if err := s.urlRepo.Update(url); err != nil {
@@ -151,6 +151,13 @@ func (s *urlService) DeleteURLs(ids []uint) error {
 }
 
 func (s *urlService) RecrawlURLs(ids []uint) error {
+	// Clear any cancellation flags before recrawling
+	for _, id := range ids {
+		if err := s.queue.ClearCancellation(id); err != nil {
+			return err
+		}
+	}
+
 	return s.StartCrawling(ids)
 }
 
