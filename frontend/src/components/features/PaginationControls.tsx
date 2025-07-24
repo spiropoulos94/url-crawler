@@ -1,8 +1,8 @@
-import React from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '../ui/Button';
-import { Container, Flex } from '../ui/Layout';
-import { Text } from '../ui/Typography';
+import React from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "../ui/Button";
+import { Container, Flex } from "../ui/Layout";
+import { Text } from "../ui/Typography";
 
 export interface PaginationControlsProps {
   currentPage: number;
@@ -26,21 +26,32 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
 
   return (
     <Container className="bg-gradient-to-r from-gray-50 to-gray-100 px-3 sm:px-6 lg:px-8 py-4 sm:py-6 border-t border-gray-200">
-      <Flex direction="col" gap="sm" className="sm:flex-row sm:items-center sm:justify-between">
+      <Flex
+        direction="col"
+        gap="sm"
+        align="center"
+        className="sm:flex-row sm:items-center sm:justify-between"
+      >
         <Container className="text-center sm:text-left">
-          <Text variant="body" className="text-xs sm:text-sm font-medium text-gray-700">
-            <Text className="block xs:inline">
+          <Text
+            variant="body"
+            className="text-xs sm:text-sm font-medium text-gray-700"
+          >
+            <span className="block xs:inline">
               Showing{" "}
-              <Text className="font-bold text-primary-600">{startItem}</Text>{" "}
-              to{" "}
-              <Text className="font-bold text-primary-600">{endItem}</Text>
-            </Text>
-            <Text className="block xs:inline">
-              {" "}of <Text className="font-bold text-primary-600">{total}</Text> results
-            </Text>
+              <span className="font-bold text-primary-600">{startItem}</span> to{" "}
+              <span className="font-bold text-primary-600">{endItem}</span>
+            </span>
+            <span className="block xs:inline">
+              {" "}
+              of <span className="font-bold text-primary-600">
+                {total}
+              </span>{" "}
+              results
+            </span>
           </Text>
         </Container>
-        
+
         <Flex align="center" justify="center" gap="sm">
           <Button
             variant="secondary"
@@ -49,15 +60,22 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
             icon={ChevronLeft}
             className="px-2 sm:px-4 py-2 text-xs sm:text-sm"
           >
-            <Text className="hidden xs:inline text-xs sm:text-sm">Previous</Text>
+            <Text className="hidden xs:inline text-xs sm:text-sm">
+              Previous
+            </Text>
           </Button>
-          
+
           <Container className="px-2 sm:px-4 py-2 bg-white rounded-lg border border-gray-300">
-            <Text variant="body" className="text-xs sm:text-sm font-bold text-gray-700 whitespace-nowrap">
-              <Text className="hidden xs:inline">Page </Text>{currentPage}<Text className="hidden xs:inline"> of {totalPages}</Text>
+            <Text
+              variant="body"
+              className="text-xs sm:text-sm font-bold text-gray-700 whitespace-nowrap"
+            >
+              <span className="hidden xs:inline">Page </span>
+              {currentPage}
+              <span className="hidden xs:inline"> of {totalPages}</span>
             </Text>
           </Container>
-          
+
           <Button
             variant="secondary"
             onClick={onNext}
