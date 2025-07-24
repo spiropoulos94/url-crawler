@@ -43,10 +43,10 @@ export const URLTableHeader: React.FC<URLTableHeaderProps> = ({
               variant="secondary"
               onClick={onClearSort}
               icon={X}
-              className="px-3 py-2.5 text-sm flex-shrink-0"
+              className="text-sm flex-shrink-0"
               title="Clear sorting"
             >
-              <Text className="hidden xs:inline text-sm">Clear Sort</Text>
+              <Text>Clear Sort</Text>
             </Button>
           )}
         </Flex>
