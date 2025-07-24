@@ -44,7 +44,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
     <th
       className={`px-4 py-3 text-left ${
         sortable
-          ? "cursor-pointer hover:bg-gray-200 transition-colors duration-200 rounded-lg"
+          ? "cursor-pointer hover:bg-gray-200 transition-colors duration-200 "
           : ""
       } ${className}`}
       onClick={handleClick}
