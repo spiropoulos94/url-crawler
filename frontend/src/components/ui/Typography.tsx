@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export interface HeadingProps {
   level?: 1 | 2 | 3 | 4 | 5 | 6;
@@ -7,7 +7,7 @@ export interface HeadingProps {
 }
 
 export interface TextProps extends React.HTMLAttributes<HTMLElement> {
-  variant?: 'body' | 'caption' | 'subtitle';
+  variant?: "body" | "caption" | "subtitle";
   children: React.ReactNode;
   className?: string;
 }
@@ -18,19 +18,19 @@ export interface LabelProps {
   className?: string;
 }
 
-export const Heading: React.FC<HeadingProps> = ({ 
-  level = 2, 
-  children, 
-  className = '' 
+export const Heading: React.FC<HeadingProps> = ({
+  level = 2,
+  children,
+  className = "",
 }) => {
-  const baseClasses = 'font-bold text-gray-900';
+  const baseClasses = "font-bold text-gray-900";
   const levelClasses = {
-    1: 'text-3xl sm:text-4xl',
-    2: 'text-xl sm:text-2xl',
-    3: 'text-lg sm:text-xl',
-    4: 'text-base sm:text-lg',
-    5: 'text-sm sm:text-base',
-    6: 'text-xs sm:text-sm',
+    1: "text-2xl sm:text-3xl",
+    2: "text-lg sm:text-xl",
+    3: "text-base sm:text-lg",
+    4: "text-sm sm:text-base",
+    5: "text-xs sm:text-sm",
+    6: "text-xs",
   };
 
   const combinedClassName = `${baseClasses} ${levelClasses[level]} ${className}`;
@@ -53,16 +53,16 @@ export const Heading: React.FC<HeadingProps> = ({
   }
 };
 
-export const Text: React.FC<TextProps> = ({ 
-  variant = 'body', 
-  children, 
-  className = '',
+export const Text: React.FC<TextProps> = ({
+  variant = "body",
+  children,
+  className = "",
   ...props
 }) => {
   const variants = {
-    body: 'text-sm sm:text-base text-gray-600',
-    caption: 'text-xs sm:text-sm text-gray-500',
-    subtitle: 'text-base sm:text-lg text-gray-700 font-medium',
+    body: "text-sm text-gray-600",
+    caption: "text-xs text-gray-500",
+    subtitle: "text-sm sm:text-base text-gray-700 font-medium",
   };
 
   return (
@@ -72,15 +72,15 @@ export const Text: React.FC<TextProps> = ({
   );
 };
 
-export const Label: React.FC<LabelProps> = ({ 
-  children, 
-  htmlFor, 
-  className = '' 
+export const Label: React.FC<LabelProps> = ({
+  children,
+  htmlFor,
+  className = "",
 }) => {
   return (
-    <label 
+    <label
       htmlFor={htmlFor}
-      className={`block text-sm font-bold text-gray-700 mb-2 ${className}`}
+      className={`block text-sm font-medium text-gray-700 mb-1.5 ${className}`}
     >
       {children}
     </label>

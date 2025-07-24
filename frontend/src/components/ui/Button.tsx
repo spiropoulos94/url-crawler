@@ -21,7 +21,7 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseClasses =
-    "font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer px-4 py-2.5";
+    "font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 cursor-pointer px-3 py-1.5 text-sm";
 
   const variants = {
     primary:
@@ -48,12 +48,12 @@ export const Button: React.FC<ButtonProps> = ({
     >
       {isLoading ? (
         <>
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
+          <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-current" />
           <span>Loading...</span>
         </>
       ) : (
         <>
-          {Icon && <Icon className="h-4 w-4" />}
+          {Icon && <Icon className="h-3.5 w-3.5" />}
           {children && <span>{children}</span>}
         </>
       )}

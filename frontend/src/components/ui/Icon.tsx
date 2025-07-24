@@ -30,11 +30,11 @@ export const Icon: React.FC<IconProps> = ({
   className = "",
 }) => {
   const sizeClasses = {
-    xs: "h-3 w-3",
-    sm: "h-4 w-4",
-    md: "h-5 w-5",
-    lg: "h-6 w-6",
-    xl: "h-8 w-8",
+    xs: "h-2.5 w-2.5",
+    sm: "h-3.5 w-3.5",
+    md: "h-4 w-4",
+    lg: "h-5 w-5",
+    xl: "h-6 w-6",
   };
 
   return <IconComponent className={`${sizeClasses[size]} ${className}`} />;
@@ -66,11 +66,11 @@ export const IconContainer: React.FC<IconContainerProps> = ({
   };
 
   const sizeClasses = {
-    xs: "p-1",
-    sm: "p-1.5",
-    md: "p-2",
-    lg: "p-2.5",
-    xl: "p-3",
+    xs: "p-0.5",
+    sm: "p-1",
+    md: "p-1.5",
+    lg: "p-2",
+    xl: "p-2.5",
   };
 
   const combinedClassName =

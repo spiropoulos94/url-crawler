@@ -32,10 +32,10 @@ export const Alert: React.FC<AlertProps> = ({
 
   return (
     <div
-      className={`flex items-center space-x-3 p-4 border rounded-xl ${config.colors} ${className}`}
+      className={`flex items-center space-x-2.5 p-3 border rounded-lg ${config.colors} ${className}`}
     >
-      <div className={`p-1 rounded-full ${config.iconBg}`}>
-        <Icon className={`h-5 w-5 ${config.iconColor}`} />
+      <div className={`p-0.5 rounded-full ${config.iconBg}`}>
+        <Icon className={`h-4 w-4 ${config.iconColor}`} />
       </div>
       <span className="text-sm font-medium">{message}</span>
     </div>

@@ -30,20 +30,20 @@ export const AddURL: React.FC = React.memo(() => {
         <Heading level={2}>
           <Flex align="center" gap="sm">
             <IconContainer bg="green" size="sm">
-              <Icon icon={Plus} size="md" className="text-green-600" />
+              <Icon icon={Plus} size="sm" className="text-green-600" />
             </IconContainer>
             Add New URL
           </Flex>
         </Heading>
-        <Text variant="body" className="mt-2">
+        <Text variant="body" className="mt-1">
           Enter a website URL to start crawling and analyzing its content
         </Text>
       </CardHeader>
 
       <CardContent>
         <form onSubmit={onSubmit}>
-          <Stack spacing="lg">
-            <Flex direction="col" gap="md" className="sm:flex-row sm:gap-4">
+          <Stack spacing="md">
+            <Flex direction="col" gap="sm" className="sm:flex-row sm:gap-3">
               <Flex className="flex-1 w-full">
                 <Input
                   type="text"

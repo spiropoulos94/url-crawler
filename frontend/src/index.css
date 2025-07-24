@@ -2,6 +2,6 @@
 
 @layer components {
   .card {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6;
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4;
   }
 }

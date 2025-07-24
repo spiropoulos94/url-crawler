@@ -83,11 +83,14 @@ export const URLTable: React.FC = React.memo(() => {
   const renderSortableHeader = (column: SortableColumn) => (
     <th
       key={column.key}
-      className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors duration-200 rounded-lg"
+      className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors duration-200 rounded-lg"
       onClick={() => pagination.handleSort(column.key)}
     >
       <Flex align="center" gap="sm">
-        <Text variant="body" className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+        <Text
+          variant="body"
+          className="text-xs font-bold text-gray-700 uppercase tracking-wider"
+        >
           {column.label}
         </Text>
         {getSortIcon(column.key)}
@@ -99,7 +102,10 @@ export const URLTable: React.FC = React.memo(() => {
     return (
       <Card>
         <CardHeader className="bg-gradient-to-r from-primary-50 to-blue-50">
-          <Heading level={2} className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
+          <Heading
+            level={2}
+            className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6"
+          >
             Website URLs
           </Heading>
         </CardHeader>
@@ -154,10 +160,17 @@ export const URLTable: React.FC = React.memo(() => {
     return (
       <Card>
         <CardHeader className="bg-gradient-to-r from-primary-50 to-blue-50">
-          <Heading level={2} className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
+          <Heading
+            level={2}
+            className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6"
+          >
             Website URLs
           </Heading>
-          <Flex direction="col" gap="md" className="sm:flex-row sm:justify-between sm:items-center">
+          <Flex
+            direction="col"
+            gap="md"
+            className="sm:flex-row sm:justify-between sm:items-center"
+          >
             <Container className="flex-1 max-w-md">
               <SearchInput
                 value={pagination.search}
@@ -184,11 +197,18 @@ export const URLTable: React.FC = React.memo(() => {
     <Card>
       {/* Header with gradient */}
       <CardHeader className="bg-gradient-to-r from-primary-50 to-blue-50">
-        <Heading level={2} className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
+        <Heading
+          level={2}
+          className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6"
+        >
           Website URLs
         </Heading>
         <Stack spacing="lg">
-          <Flex direction="col" gap="sm" className="xs:flex-row xs:items-center">
+          <Flex
+            direction="col"
+            gap="sm"
+            className="xs:flex-row xs:items-center"
+          >
             <SearchInput
               value={pagination.search}
               onChange={pagination.handleSearch}
@@ -221,37 +241,49 @@ export const URLTable: React.FC = React.memo(() => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
             <tr>
-              <th className="px-6 py-4 text-left">
+              <th className="px-4 py-3 text-left">
                 <input
                   type="checkbox"
                   checked={isAllSelected}
                   onChange={(e) =>
                     e.target.checked ? selectAll(urls) : clearSelection()
                   }
-                  className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 focus:ring-2"
+                  className="w-3.5 h-3.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 focus:ring-2"
                 />
               </th>
               {renderSortableHeader({ key: "url", label: "URL" })}
               {renderSortableHeader({ key: "title", label: "Title" })}
               {renderSortableHeader({ key: "status", label: "Status" })}
-              <th className="px-6 py-4 text-left">
-                <Text variant="body" className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left">
+                <Text
+                  variant="body"
+                  className="text-xs font-bold text-gray-700 uppercase tracking-wider"
+                >
                   Internal Links
                 </Text>
               </th>
-              <th className="px-6 py-4 text-left">
-                <Text variant="body" className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left">
+                <Text
+                  variant="body"
+                  className="text-xs font-bold text-gray-700 uppercase tracking-wider"
+                >
                   External Links
                 </Text>
               </th>
-              <th className="px-6 py-4 text-left">
-                <Text variant="body" className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left">
+                <Text
+                  variant="body"
+                  className="text-xs font-bold text-gray-700 uppercase tracking-wider"
+                >
                   Broken Links
                 </Text>
               </th>
               {renderSortableHeader({ key: "created_at", label: "Created" })}
-              <th className="px-6 py-4 text-left">
-                <Text variant="body" className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left">
+                <Text
+                  variant="body"
+                  className="text-xs font-bold text-gray-700 uppercase tracking-wider"
+                >
                   Actions
                 </Text>
               </th>
@@ -265,25 +297,29 @@ export const URLTable: React.FC = React.memo(() => {
                   key={url.id}
                   className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200"
                 >
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-3">
                     <input
                       type="checkbox"
                       checked={selectedIds.includes(url.id)}
                       onChange={() => toggleSelection(url.id)}
-                      className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 focus:ring-2"
+                      className="w-3.5 h-3.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 focus:ring-2"
                     />
                   </td>
-                  <td className="px-6 py-4 max-w-xs">
+                  <td className="px-4 py-3 max-w-xs">
                     <Container className="truncate">
-                      <Text variant="body" className="text-sm font-medium text-gray-900" title={url.url}>
+                      <Text
+                        variant="body"
+                        className="text-sm font-medium text-gray-900"
+                        title={url.url}
+                      >
                         {url.url}
                       </Text>
                     </Container>
                   </td>
-                  <td className="px-6 py-4 max-w-xs">
+                  <td className="px-4 py-3 max-w-xs">
                     <Container className="truncate">
-                      <Text 
-                        variant="body" 
+                      <Text
+                        variant="body"
                         className="text-sm text-gray-700 font-medium"
                         title={url.title || latestResult?.title || "-"}
                       >
@@ -291,30 +327,33 @@ export const URLTable: React.FC = React.memo(() => {
                       </Text>
                     </Container>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-3">
                     <StatusBadge status={url.status} />
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-3">
                     <Badge variant="info" size="sm">
                       {latestResult?.internal_links ?? "-"}
                     </Badge>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-3">
                     <Badge variant="success" size="sm">
                       {latestResult?.external_links ?? "-"}
                     </Badge>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-3">
                     <Badge variant="danger" size="sm">
                       {latestResult?.broken_links ?? "-"}
                     </Badge>
                   </td>
-                  <td className="px-6 py-4">
-                    <Text variant="body" className="text-sm text-gray-600 font-medium">
+                  <td className="px-4 py-3">
+                    <Text
+                      variant="body"
+                      className="text-sm text-gray-600 font-medium"
+                    >
                       {new Date(url.created_at).toLocaleDateString()}
                     </Text>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-3">
                     <Button
                       variant="secondary"
                       onClick={() => navigate(`/url/${url.id}`)}
