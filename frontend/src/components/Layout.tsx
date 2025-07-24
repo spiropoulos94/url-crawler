@@ -1,6 +1,6 @@
 import React from "react";
 import { useAuth } from "./providers/AuthProvider";
-import { NavigationBar } from "./molecules";
+import { NavigationBar } from "./layout/NavigationBar";
 
 interface LayoutProps {
   children: React.ReactNode;

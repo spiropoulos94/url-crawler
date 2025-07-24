@@ -8,7 +8,7 @@ import { TableLoadingSkeleton } from "./LoadingSpinner";
 import { EmptyState } from "./EmptyState";
 import { URLTableMobile } from "./features/URLTableMobile";
 import { PaginationControls } from "./features/PaginationControls";
-import { URLTableHeader, URLTableDesktop } from "./molecules";
+import { URLTableHeader, URLTableDesktop } from "./features";
 import { Card, CardHeader, CardContent, Heading, Flex, Container } from "./ui";
 import { Globe, Search } from "lucide-react";
 

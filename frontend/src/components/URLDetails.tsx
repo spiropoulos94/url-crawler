@@ -4,8 +4,9 @@ import { useURL } from "../hooks/useURLs";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { EmptyState } from "./EmptyState";
 import { AlertTriangle } from "lucide-react";
-import { PageHeader, MetricOverview, BrokenLinksTable } from "./molecules";
-import { URLChartsSection } from "./organisms";
+import { PageHeader } from "./layout/PageHeader";
+import { MetricOverview, BrokenLinksTable } from "./features";
+import { URLChartsSection } from "./features";
 
 export const URLDetails: React.FC = React.memo(() => {
   const { id } = useParams<{ id: string }>();

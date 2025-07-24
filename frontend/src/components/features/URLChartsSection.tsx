@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { ExternalLink, Hash } from "lucide-react";
-import { ChartCard } from "../molecules";
+import { ChartCard } from ".";
 import { ChartEmptyState } from "../ui";
 
 export interface LinkData {
