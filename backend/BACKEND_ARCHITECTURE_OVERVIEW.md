@@ -1,6 +1,6 @@
 # ⏺ Backend Architecture Overview
 
-Your backend is a Go-based web crawler service with a clean architecture following domain-driven design principles. Here's how it's structured:
+This backend is a Go-based web crawler service with a clean architecture following domain-driven design principles. Here's how it's structured:
 
 ---
 
