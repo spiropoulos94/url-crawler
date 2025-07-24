@@ -6,33 +6,17 @@ import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { useBulkSelection } from "../hooks/useBulkSelection";
 import { TableLoadingSkeleton } from "./LoadingSpinner";
 import { EmptyState } from "./EmptyState";
-import { SearchInput } from "./features/SearchInput";
-import { BulkActionBar } from "./features/BulkActionBar";
 import { URLTableMobile } from "./features/URLTableMobile";
 import { PaginationControls } from "./features/PaginationControls";
-import { StatusBadge } from "./ui/StatusBadge";
-import { Badge } from "./ui/Badge";
-import { Card, CardHeader, CardContent } from "./ui/Card";
-import { Heading, Text } from "./ui/Typography";
-import { Container, Flex, Stack } from "./ui/Layout";
-import { Button } from "./ui/Button";
-import {
-  Eye,
-  Globe,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  X,
-  Search,
-} from "lucide-react";
-import type { URL } from "../types";
+import { URLTableHeader, URLTableDesktop } from "./molecules";
+import { Card, CardHeader, CardContent, Heading, Flex, Container } from "./ui";
+import { Globe, Search } from "lucide-react";
 
-type SortableColumn = {
-  key: string;
-  label: string;
-};
+export interface URLTableProps {
+  className?: string;
+}
 
-export const URLTable: React.FC = React.memo(() => {
+export const URLTable: React.FC<URLTableProps> = ({ className = "" }) => {
   const navigate = useNavigate();
   const pagination = usePagination({ initialLimit: 10 });
   const { data, isLoading, error, refetch } = useURLs(pagination.params);
@@ -69,38 +53,14 @@ export const URLTable: React.FC = React.memo(() => {
     );
   };
 
-  const getSortIcon = (columnKey: string) => {
-    if (pagination.sortBy !== columnKey) {
-      return <ArrowUpDown className="h-4 w-4 text-gray-400" />;
-    }
-    return pagination.sortOrder === "asc" ? (
-      <ArrowUp className="h-4 w-4 text-primary-600" />
-    ) : (
-      <ArrowDown className="h-4 w-4 text-primary-600" />
-    );
+  const handleNavigate = (id: number) => {
+    navigate(`/url/${id}`);
   };
 
-  const renderSortableHeader = (column: SortableColumn) => (
-    <th
-      key={column.key}
-      className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors duration-200 rounded-lg"
-      onClick={() => pagination.handleSort(column.key)}
-    >
-      <Flex align="center" gap="sm">
-        <Text
-          variant="body"
-          className="text-xs font-bold text-gray-700 uppercase tracking-wider"
-        >
-          {column.label}
-        </Text>
-        {getSortIcon(column.key)}
-      </Flex>
-    </th>
-  );
-
+  // Loading state
   if (isLoading) {
     return (
-      <Card>
+      <Card className={className}>
         <CardHeader className="bg-gradient-to-r from-primary-50 to-blue-50">
           <Heading
             level={2}
@@ -116,9 +76,10 @@ export const URLTable: React.FC = React.memo(() => {
     );
   }
 
+  // Error state
   if (error) {
     return (
-      <Card>
+      <Card className={className}>
         <CardHeader className="bg-gradient-to-r from-primary-50 to-blue-50">
           <Heading level={2} className="text-2xl font-bold text-gray-900">
             Website URLs
@@ -140,7 +101,7 @@ export const URLTable: React.FC = React.memo(() => {
   // Empty state when no URLs exist
   if (!isLoading && urls.length === 0 && !pagination.search) {
     return (
-      <Card>
+      <Card className={className}>
         <CardHeader className="bg-gradient-to-r from-primary-50 to-blue-50">
           <Heading level={2} className="text-2xl font-bold text-gray-900">
             Website URLs
@@ -158,7 +119,7 @@ export const URLTable: React.FC = React.memo(() => {
   // Empty state when search returns no results
   if (!isLoading && urls.length === 0 && pagination.search) {
     return (
-      <Card>
+      <Card className={className}>
         <CardHeader className="bg-gradient-to-r from-primary-50 to-blue-50">
           <Heading
             level={2}
@@ -172,10 +133,14 @@ export const URLTable: React.FC = React.memo(() => {
             className="sm:flex-row sm:justify-between sm:items-center"
           >
             <Container className="flex-1 max-w-md">
-              <SearchInput
-                value={pagination.search}
-                onChange={pagination.handleSearch}
-                placeholder="Search URLs or titles..."
+              <URLTableHeader
+                searchValue={pagination.search}
+                onSearchChange={pagination.handleSearch}
+                selectedCount={selectedIds.length}
+                onBulkAction={handleBulkAction}
+                bulkActionDisabled={bulkActionMutation.isPending}
+                sortBy={pagination.sortBy}
+                onClearSort={pagination.clearSort}
               />
             </Container>
           </Flex>
@@ -193,8 +158,9 @@ export const URLTable: React.FC = React.memo(() => {
     );
   }
 
+  // Main table with data
   return (
-    <Card>
+    <Card className={className}>
       {/* Header with gradient */}
       <CardHeader className="bg-gradient-to-r from-primary-50 to-blue-50">
         <Heading
@@ -203,178 +169,40 @@ export const URLTable: React.FC = React.memo(() => {
         >
           Website URLs
         </Heading>
-        <Stack spacing="lg">
-          <Flex
-            direction="col"
-            gap="sm"
-            className="xs:flex-row xs:items-center"
-          >
-            <SearchInput
-              value={pagination.search}
-              onChange={pagination.handleSearch}
-              placeholder="Search URLs or titles..."
-            />
 
-            {pagination.sortBy !== "created_at" && (
-              <Button
-                variant="secondary"
-                onClick={pagination.clearSort}
-                icon={X}
-                className="px-3 py-2.5 text-sm flex-shrink-0"
-                title="Clear sorting"
-              >
-                <Text className="hidden xs:inline text-sm">Clear Sort</Text>
-              </Button>
-            )}
-          </Flex>
-
-          <BulkActionBar
-            selectedCount={selectedIds.length}
-            onAction={handleBulkAction}
-            disabled={bulkActionMutation.isPending}
-          />
-        </Stack>
+        <URLTableHeader
+          searchValue={pagination.search}
+          onSearchChange={pagination.handleSearch}
+          selectedCount={selectedIds.length}
+          onBulkAction={handleBulkAction}
+          bulkActionDisabled={bulkActionMutation.isPending}
+          sortBy={pagination.sortBy}
+          onClearSort={pagination.clearSort}
+        />
       </CardHeader>
 
-      {/* Desktop Table - Hidden on mobile */}
-      <Container className="hidden lg:block overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-            <tr>
-              <th className="px-4 py-3 text-left">
-                <input
-                  type="checkbox"
-                  checked={isAllSelected}
-                  onChange={(e) =>
-                    e.target.checked ? selectAll(urls) : clearSelection()
-                  }
-                  className="w-3.5 h-3.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 focus:ring-2"
-                />
-              </th>
-              {renderSortableHeader({ key: "url", label: "URL" })}
-              {renderSortableHeader({ key: "title", label: "Title" })}
-              {renderSortableHeader({ key: "status", label: "Status" })}
-              <th className="px-4 py-3 text-left">
-                <Text
-                  variant="body"
-                  className="text-xs font-bold text-gray-700 uppercase tracking-wider"
-                >
-                  Internal Links
-                </Text>
-              </th>
-              <th className="px-4 py-3 text-left">
-                <Text
-                  variant="body"
-                  className="text-xs font-bold text-gray-700 uppercase tracking-wider"
-                >
-                  External Links
-                </Text>
-              </th>
-              <th className="px-4 py-3 text-left">
-                <Text
-                  variant="body"
-                  className="text-xs font-bold text-gray-700 uppercase tracking-wider"
-                >
-                  Broken Links
-                </Text>
-              </th>
-              {renderSortableHeader({ key: "created_at", label: "Created" })}
-              <th className="px-4 py-3 text-left">
-                <Text
-                  variant="body"
-                  className="text-xs font-bold text-gray-700 uppercase tracking-wider"
-                >
-                  Actions
-                </Text>
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-100">
-            {urls.map((url: URL) => {
-              const latestResult = url.results?.[0];
-              return (
-                <tr
-                  key={url.id}
-                  className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200"
-                >
-                  <td className="px-4 py-3">
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.includes(url.id)}
-                      onChange={() => toggleSelection(url.id)}
-                      className="w-3.5 h-3.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 focus:ring-2"
-                    />
-                  </td>
-                  <td className="px-4 py-3 max-w-xs">
-                    <Container className="truncate">
-                      <Text
-                        variant="body"
-                        className="text-sm font-medium text-gray-900"
-                        title={url.url}
-                      >
-                        {url.url}
-                      </Text>
-                    </Container>
-                  </td>
-                  <td className="px-4 py-3 max-w-xs">
-                    <Container className="truncate">
-                      <Text
-                        variant="body"
-                        className="text-sm text-gray-700 font-medium"
-                        title={url.title || latestResult?.title || "-"}
-                      >
-                        {url.title || latestResult?.title || "-"}
-                      </Text>
-                    </Container>
-                  </td>
-                  <td className="px-4 py-3">
-                    <StatusBadge status={url.status} />
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge variant="info" size="sm">
-                      {latestResult?.internal_links ?? "-"}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge variant="success" size="sm">
-                      {latestResult?.external_links ?? "-"}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge variant="danger" size="sm">
-                      {latestResult?.broken_links ?? "-"}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Text
-                      variant="body"
-                      className="text-sm text-gray-600 font-medium"
-                    >
-                      {new Date(url.created_at).toLocaleDateString()}
-                    </Text>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Button
-                      variant="secondary"
-                      onClick={() => navigate(`/url/${url.id}`)}
-                      icon={Eye}
-                      className="p-2"
-                      title="View details"
-                    />
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </Container>
+      {/* Desktop Table */}
+      <URLTableDesktop
+        urls={urls}
+        selectedIds={selectedIds}
+        onToggleSelection={toggleSelection}
+        onSelectAll={selectAll}
+        onClearSelection={clearSelection}
+        onNavigate={handleNavigate}
+        sortBy={pagination.sortBy}
+        sortOrder={pagination.sortOrder}
+        onSort={pagination.handleSort}
+        isAllSelected={isAllSelected}
+      />
 
+      {/* Mobile Table */}
       <URLTableMobile
         urls={urls}
         selectedIds={selectedIds}
         onToggleSelection={toggleSelection}
       />
 
+      {/* Pagination */}
       <PaginationControls
         currentPage={pagination.page}
         totalPages={totalPages}
@@ -385,4 +213,4 @@ export const URLTable: React.FC = React.memo(() => {
       />
     </Card>
   );
-});
+};

@@ -13,3 +13,6 @@ export * from "./Logo";
 export * from "./UserMenu";
 export * from "./ErrorDisplay";
 export * from "./BackButton";
+export * from "./TableCell";
+export * from "./TableHeader";
+export * from "./CheckboxCell";
