@@ -39,6 +39,7 @@ func (s *urlService) AddURL(urlStr string) (*models.URL, error) {
 
 	urlStr = s.normalizeURL(urlStr)
 
+	// First, check for existing active URL
 	existing, err := s.urlRepo.GetByURL(urlStr)
 	if err == nil {
 		return existing, nil
@@ -47,6 +48,28 @@ func (s *urlService) AddURL(urlStr string) (*models.URL, error) {
 		return nil, err
 	}
 
+	// Check for soft-deleted URL and restore it
+	if existingDeleted, err := s.urlRepo.GetDeletedByURL(urlStr); err == nil {
+		// Restore the soft-deleted URL
+		if err := s.urlRepo.RestoreURL(existingDeleted.ID); err != nil {
+			return nil, err
+		}
+		
+		// Update status and enqueue
+		if err := s.urlRepo.UpdateStatus(existingDeleted.ID, models.StatusQueued); err != nil {
+			return nil, err
+		}
+		
+		if err := s.queue.EnqueueCrawlJob(existingDeleted.ID); err != nil {
+			s.urlRepo.UpdateStatus(existingDeleted.ID, models.StatusError)
+			return nil, err
+		}
+		
+		// Return the restored URL
+		return s.urlRepo.GetByID(existingDeleted.ID)
+	}
+
+	// Create new URL if no existing or deleted URL found
 	newURL := &models.URL{
 		URL:    urlStr,
 		Status: models.StatusQueued,

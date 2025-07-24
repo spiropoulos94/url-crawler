@@ -1,7 +1,8 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useURL } from "../hooks/useURLs";
 import { LoadingSpinner } from "./LoadingSpinner";
+import { EmptyState } from "./EmptyState";
 import {
   ArrowLeft,
   Globe,
@@ -29,7 +30,19 @@ export const URLDetails: React.FC = React.memo(() => {
   const navigate = useNavigate();
   const urlId = parseInt(id || '0', 10);
 
-  const { data, isLoading, error } = useURL(urlId);
+  const { data, isLoading, error, refetch } = useURL(urlId);
+
+  // Auto-refresh every 3 seconds if the URL is being crawled
+  useEffect(() => {
+    const url = data?.data;
+    if (url && ['queued', 'running'].includes(url.status)) {
+      const interval = setInterval(() => {
+        refetch();
+      }, 3000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [data?.data, refetch]);
   
   const url = data?.data;
   const result = url?.results?.[0];
@@ -108,14 +121,29 @@ export const URLDetails: React.FC = React.memo(() => {
       </div>
 
       {!result ? (
-        <div className="card text-center py-8">
-          <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No Analysis Available
-          </h3>
-          <p className="text-gray-600">
-            This URL hasn't been crawled yet or the crawl failed.
-          </p>
+        <div className="card">
+          <EmptyState
+            icon={AlertTriangle}
+            title="No Analysis Available"
+            description={
+              url?.status === 'queued' 
+                ? "This URL is queued for crawling. The analysis will appear here once the crawl is complete."
+                : url?.status === 'running'
+                ? "This URL is currently being crawled. The analysis will appear here once the crawl is complete."
+                : url?.status === 'error'
+                ? "The crawl failed for this URL. Please try crawling it again or check if the URL is accessible."
+                : "This URL hasn't been crawled yet. The analysis will appear here once the crawl is complete."
+            }
+            action={
+              url?.status === 'error' ? {
+                label: "Retry Crawl",
+                onClick: () => {
+                  // You could implement a retry function here
+                  window.location.reload();
+                }
+              } : undefined
+            }
+          />
         </div>
       ) : (
         <>

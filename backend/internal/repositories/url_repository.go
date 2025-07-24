@@ -10,6 +10,8 @@ type URLRepository interface {
 	Create(url *models.URL) error
 	GetByID(id uint) (*models.URL, error)
 	GetByURL(url string) (*models.URL, error)
+	GetDeletedByURL(url string) (*models.URL, error)
+	RestoreURL(id uint) error
 	GetAll(offset, limit int, search string) ([]*models.URL, int64, error)
 	Update(url *models.URL) error
 	Delete(id uint) error
@@ -45,6 +47,19 @@ func (r *urlRepository) GetByURL(urlStr string) (*models.URL, error) {
 		return nil, err
 	}
 	return &url, nil
+}
+
+func (r *urlRepository) GetDeletedByURL(urlStr string) (*models.URL, error) {
+	var url models.URL
+	err := r.db.Unscoped().Where("url = ? AND deleted_at IS NOT NULL", urlStr).First(&url).Error
+	if err != nil {
+		return nil, err
+	}
+	return &url, nil
+}
+
+func (r *urlRepository) RestoreURL(id uint) error {
+	return r.db.Unscoped().Model(&models.URL{}).Where("id = ?", id).Update("deleted_at", nil).Error
 }
 
 func (r *urlRepository) GetAll(offset, limit int, search string) ([]*models.URL, int64, error) {

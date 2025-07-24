@@ -47,8 +47,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="space-y-8">{children}</div>
+      <main className="max-w-7xl mx-auto py-4 sm:py-6 lg:py-8 px-3 sm:px-4 lg:px-8">
+        <div className="space-y-6 sm:space-y-8">{children}</div>
       </main>
     </div>
   );

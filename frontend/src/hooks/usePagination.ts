@@ -56,6 +56,11 @@ export const usePagination = ({
     setPage(prev => Math.max(1, prev - 1));
   }, []);
 
+  const clearSort = useCallback(() => {
+    setSortBy(initialSortBy);
+    setSortOrder(initialSortOrder);
+  }, [initialSortBy, initialSortOrder]);
+
   const reset = useCallback(() => {
     setPage(initialPage);
     setLimit(initialLimit);
@@ -75,6 +80,7 @@ export const usePagination = ({
     setLimit,
     handleSearch,
     handleSort,
+    clearSort,
     goToPage,
     nextPage,
     prevPage,
