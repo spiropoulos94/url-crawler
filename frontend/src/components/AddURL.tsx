@@ -52,7 +52,7 @@ export const AddURL: React.FC = React.memo(() => {
                   onChange={(e) => setFieldValue("url", e.target.value)}
                   error={errors.url}
                   disabled={isSubmitting}
-                  className="text-base sm:text-lg "
+                  className=" px-3 py-2 w-full rounded-lg border border-gray-200 bg-white/90 backdrop-blur-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100 transition-all duration-200 placeholder-gray-500 text-sm shadow-sm focus:shadow-md"
                 />
               </Flex>
               <Button
@@ -61,7 +61,7 @@ export const AddURL: React.FC = React.memo(() => {
                 disabled={isSubmitting || !formData.url.trim()}
                 isLoading={isSubmitting}
                 icon={Plus}
-                className="min-w-[120px] sm:min-w-[140px] px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto"
+                className="min-w-[120px] sm:min-w-[140px] pr-3 py-2 w-full sm:w-auto"
               >
                 Add URL
               </Button>
