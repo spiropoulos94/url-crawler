@@ -1,4 +1,5 @@
 import React from "react";
+import { AlertTriangle } from "lucide-react";
 import { CheckboxCell, TableCell, Text, Badge, StatusBadge } from "../ui";
 import type { URL } from "../../types";
 
@@ -60,7 +61,17 @@ export const URLTableRow: React.FC<URLTableRowProps> = ({
       </TableCell>
 
       <TableCell>
-        <StatusBadge status={url.status} />
+        <div className="flex items-center gap-2">
+          <StatusBadge status={url.status} />
+          {url.status === 'error' && url.error_message && (
+            <div 
+              className="text-red-500 cursor-help" 
+              title={url.error_message}
+            >
+              <AlertTriangle className="h-4 w-4" />
+            </div>
+          )}
+        </div>
       </TableCell>
 
       <TableCell>

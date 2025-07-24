@@ -82,7 +82,7 @@ func (s *Server) startBackgroundWorkers() {
 	resultRepo := repositories.NewCrawlResultRepository(s.db)
 
 	queueService := services.NewQueueService(s.redis)
-	crawlerService := services.NewCrawlerService(urlRepo, resultRepo)
+	crawlerService := services.NewCrawlerService(urlRepo, resultRepo, queueService)
 
 	go func() {
 		log.Println("Starting background crawler worker...")

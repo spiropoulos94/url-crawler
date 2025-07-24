@@ -7,6 +7,8 @@ import { AlertTriangle } from "lucide-react";
 import { PageHeader } from "./layout/PageHeader";
 import { MetricOverview, BrokenLinksTable } from "./features";
 import { URLChartsSection } from "./features";
+import { StatusBadge } from "./ui/StatusBadge";
+import { Alert } from "./ui/Alert";
 
 export const URLDetails: React.FC = React.memo(() => {
   const { id } = useParams<{ id: string }>();
@@ -100,6 +102,31 @@ export const URLDetails: React.FC = React.memo(() => {
         subtitle={url.url}
         onBack={() => navigate("/dashboard")}
       />
+
+      {/* Status Section */}
+      <div className="card p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-gray-600">Status:</span>
+            <StatusBadge status={url.status} />
+          </div>
+          <span className="text-xs text-gray-500">
+            Last updated: {new Date(url.updated_at).toLocaleString()}
+          </span>
+        </div>
+        
+        {/* Error Message */}
+        {url.status === 'error' && url.error_message && (
+          <div className="mt-3">
+            <Alert variant="danger" className="text-sm">
+              <AlertTriangle className="h-4 w-4" />
+              <div>
+                <strong>Error:</strong> {url.error_message}
+              </div>
+            </Alert>
+          </div>
+        )}
+      </div>
 
       {!result ? (
         <div className="card">

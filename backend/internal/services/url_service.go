@@ -121,7 +121,20 @@ func (s *urlService) StartCrawling(ids []uint) error {
 
 func (s *urlService) StopCrawling(ids []uint) error {
 	for _, id := range ids {
-		if err := s.urlRepo.UpdateStatus(id, models.StatusDone); err != nil {
+		// Mark job for cancellation in Redis (will show as 'stopped' to user)
+		if err := s.queue.CancelCrawlJob(id); err != nil {
+			return err
+		}
+		
+		// Get URL and clear error message when stopping
+		url, err := s.urlRepo.GetByID(id)
+		if err != nil {
+			return err
+		}
+		
+		url.Status = models.StatusStopped
+		url.ErrorMessage = "" // Clear any previous error message
+		if err := s.urlRepo.Update(url); err != nil {
 			return err
 		}
 	}

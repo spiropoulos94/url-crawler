@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 
@@ -12,6 +13,8 @@ import (
 type QueueService interface {
 	EnqueueCrawlJob(urlID uint) error
 	ProcessCrawlJobs(ctx context.Context, crawlerService CrawlerService) error
+	CancelCrawlJob(urlID uint) error
+	IsCancelled(urlID uint) (bool, error)
 }
 
 type CrawlJob struct {
@@ -66,10 +69,38 @@ func (s *queueService) ProcessCrawlJobs(ctx context.Context, crawlerService Craw
 				continue
 			}
 
+			// Check if job was cancelled before processing
+			cancelled, err := s.IsCancelled(job.URLID)
+			if err != nil {
+				log.Printf("Error checking cancellation for URL ID %d: %v", job.URLID, err)
+				continue
+			}
+			if cancelled {
+				log.Printf("Skipping cancelled job for URL ID: %d", job.URLID)
+				continue
+			}
+
 			log.Printf("Processing crawl job for URL ID: %d", job.URLID)
 			if err := crawlerService.CrawlURL(job.URLID); err != nil {
 				log.Printf("Error crawling URL ID %d: %v", job.URLID, err)
 			}
 		}
 	}
+}
+
+func (s *queueService) CancelCrawlJob(urlID uint) error {
+	key := fmt.Sprintf("cancelled_job:%d", urlID)
+	return s.redis.Set(context.Background(), key, "true", 30*time.Minute).Err()
+}
+
+func (s *queueService) IsCancelled(urlID uint) (bool, error) {
+	key := fmt.Sprintf("cancelled_job:%d", urlID)
+	result, err := s.redis.Get(context.Background(), key).Result()
+	if err != nil {
+		if err == redis.Nil {
+			return false, nil
+		}
+		return false, err
+	}
+	return result == "true", nil
 }

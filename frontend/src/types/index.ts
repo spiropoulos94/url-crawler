@@ -1,10 +1,11 @@
-export type CrawlStatus = 'queued' | 'running' | 'done' | 'error';
+export type CrawlStatus = 'queued' | 'running' | 'done' | 'error' | 'stopped';
 
 export interface URL {
   id: number;
   url: string;
   title: string;
   status: CrawlStatus;
+  error_message?: string;
   created_at: string;
   updated_at: string;
   results?: CrawlResult[];
@@ -76,7 +77,7 @@ export interface AddURLRequest {
 
 export interface BulkActionRequest {
   ids: number[];
-  action: 'start' | 'stop' | 'delete' | 'recrawl';
+  action: 'stop' | 'delete' | 'recrawl';
 }
 
 // API Response wrapper types

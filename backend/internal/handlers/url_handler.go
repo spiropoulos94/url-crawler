@@ -104,8 +104,6 @@ func (h *URLHandler) BulkAction(c *gin.Context) {
 
 	var err error
 	switch req.Action {
-	case "start":
-		err = h.urlService.StartCrawling(req.IDs)
 	case "stop":
 		err = h.urlService.StopCrawling(req.IDs)
 	case "delete":

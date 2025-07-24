@@ -2,7 +2,7 @@ import React from 'react';
 import { Badge } from './Badge';
 import { Container } from './Layout';
 
-export type StatusType = 'queued' | 'running' | 'done' | 'error';
+export type StatusType = 'queued' | 'running' | 'done' | 'error' | 'stopped';
 
 export interface StatusBadgeProps {
   status: StatusType;
@@ -25,6 +25,10 @@ const statusConfig = {
   error: {
     variant: 'danger' as const,
     gradient: 'bg-gradient-to-r from-red-400 to-rose-500',
+  },
+  stopped: {
+    variant: 'secondary' as const,
+    gradient: 'bg-gradient-to-r from-gray-400 to-slate-500',
   },
 };
 

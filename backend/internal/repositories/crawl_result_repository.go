@@ -11,6 +11,7 @@ type CrawlResultRepository interface {
 	GetByURLID(urlID uint) (*models.CrawlResult, error)
 	GetLatestByURLID(urlID uint) (*models.CrawlResult, error)
 	Update(result *models.CrawlResult) error
+	Upsert(result *models.CrawlResult) error
 	Delete(id uint) error
 }
 
@@ -48,6 +49,31 @@ func (r *crawlResultRepository) GetLatestByURLID(urlID uint) (*models.CrawlResul
 }
 
 func (r *crawlResultRepository) Update(result *models.CrawlResult) error {
+	return r.db.Save(result).Error
+}
+
+func (r *crawlResultRepository) Upsert(result *models.CrawlResult) error {
+	// Check if a result already exists for this URL
+	var existing models.CrawlResult
+	err := r.db.Where("url_id = ?", result.URLID).First(&existing).Error
+	
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			// No existing result, create new one
+			return r.db.Create(result).Error
+		}
+		return err
+	}
+	
+	// Delete old broken URLs before updating
+	if err := r.db.Where("crawl_result_id = ?", existing.ID).Delete(&models.BrokenURL{}).Error; err != nil {
+		return err
+	}
+	
+	// Update existing result with new data
+	result.ID = existing.ID // Keep the same ID
+	
+	// Update the crawl result and create new broken URLs
 	return r.db.Save(result).Error
 }
 

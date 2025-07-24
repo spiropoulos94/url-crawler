@@ -13,22 +13,24 @@ const (
 	StatusRunning CrawlStatus = "running"
 	StatusDone    CrawlStatus = "done"
 	StatusError   CrawlStatus = "error"
+	StatusStopped CrawlStatus = "stopped"
 )
 
 type URL struct {
-	ID        uint           `json:"id" gorm:"primaryKey"`
-	URL       string         `json:"url" gorm:"unique;not null;index"`
-	Title     string         `json:"title"`
-	Status    CrawlStatus    `json:"status" gorm:"default:queued"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
-	Results   []CrawlResult  `json:"results,omitempty" gorm:"foreignKey:URLID"`
+	ID           uint           `json:"id" gorm:"primaryKey"`
+	URL          string         `json:"url" gorm:"unique;not null;index"`
+	Title        string         `json:"title"`
+	Status       CrawlStatus    `json:"status" gorm:"default:queued"`
+	ErrorMessage string         `json:"error_message,omitempty"`
+	CreatedAt    time.Time      `json:"created_at"`
+	UpdatedAt    time.Time      `json:"updated_at"`
+	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
+	Results      []CrawlResult  `json:"results,omitempty" gorm:"foreignKey:URLID"`
 }
 
 type CrawlResult struct {
 	ID             uint           `json:"id" gorm:"primaryKey"`
-	URLID          uint           `json:"url_id" gorm:"not null;index"`
+	URLID          uint           `json:"url_id" gorm:"not null;uniqueIndex"`
 	HTMLVersion    string         `json:"html_version"`
 	Title          string         `json:"title"`
 	H1Count        int            `json:"h1_count"`

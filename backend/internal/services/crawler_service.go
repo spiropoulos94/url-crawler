@@ -20,12 +20,14 @@ type crawlerService struct {
 	urlRepo    repositories.URLRepository
 	resultRepo repositories.CrawlResultRepository
 	client     *http.Client
+	queue      QueueService
 }
 
-func NewCrawlerService(urlRepo repositories.URLRepository, resultRepo repositories.CrawlResultRepository) CrawlerService {
+func NewCrawlerService(urlRepo repositories.URLRepository, resultRepo repositories.CrawlResultRepository, queue QueueService) CrawlerService {
 	return &crawlerService{
 		urlRepo:    urlRepo,
 		resultRepo: resultRepo,
+		queue:      queue,
 		client: &http.Client{
 			Timeout: 30 * time.Second,
 		},
@@ -38,33 +40,62 @@ func (s *crawlerService) CrawlURL(urlID uint) error {
 		return err
 	}
 
+	// Check if job was stopped
+	cancelled, err := s.queue.IsCancelled(urlID)
+	if err != nil {
+		return err
+	}
+	if cancelled {
+		s.urlRepo.UpdateStatus(urlID, models.StatusStopped)
+		return nil
+	}
+
 	if err := s.urlRepo.UpdateStatus(urlID, models.StatusRunning); err != nil {
 		return err
 	}
 
-	result, err := s.performCrawl(urlModel.URL)
+	result, err := s.performCrawl(urlModel.URL, urlID)
 	if err != nil {
-		s.urlRepo.UpdateStatus(urlID, models.StatusError)
+		// Check if error was due to job being stopped
+		if cancelled, checkErr := s.queue.IsCancelled(urlID); checkErr == nil && cancelled {
+			urlModel.Status = models.StatusStopped
+			urlModel.ErrorMessage = ""
+		} else {
+			urlModel.Status = models.StatusError
+			urlModel.ErrorMessage = err.Error()
+		}
+		s.urlRepo.Update(urlModel)
 		result = &models.CrawlResult{
 			URLID:        urlID,
 			ErrorMessage: err.Error(),
 		}
 	} else {
-		s.urlRepo.UpdateStatus(urlID, models.StatusDone)
+		urlModel.Status = models.StatusDone
 		urlModel.Title = result.Title
+		urlModel.ErrorMessage = "" // Clear any previous error
 		s.urlRepo.Update(urlModel)
 	}
 
 	result.URLID = urlID
-	return s.resultRepo.Create(result)
+	return s.resultRepo.Upsert(result)
 }
 
-func (s *crawlerService) performCrawl(targetURL string) (*models.CrawlResult, error) {
+func (s *crawlerService) performCrawl(targetURL string, urlID uint) (*models.CrawlResult, error) {
+	// Check if job was stopped before starting HTTP request
+	if cancelled, err := s.queue.IsCancelled(urlID); err == nil && cancelled {
+		return nil, fmt.Errorf("crawl stopped")
+	}
+
 	resp, err := s.client.Get(targetURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch URL: %w", err)
 	}
 	defer resp.Body.Close()
+
+	// Check if job was stopped after HTTP request
+	if cancelled, err := s.queue.IsCancelled(urlID); err == nil && cancelled {
+		return nil, fmt.Errorf("crawl stopped")
+	}
 
 	if resp.StatusCode >= 400 {
 		return nil, fmt.Errorf("HTTP error: %d", resp.StatusCode)
