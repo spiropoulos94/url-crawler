@@ -48,6 +48,10 @@ export const URLDetails: React.FC = React.memo(() => {
     [result]
   );
 
+  const linksAreEmpty = useMemo(() => {
+    return result?.internal_links === 0 && result?.external_links === 0;
+  }, [result]);
+
   const headingData = useMemo(
     () =>
       result
@@ -136,7 +140,11 @@ export const URLDetails: React.FC = React.memo(() => {
           />
 
           {/* Charts */}
-          <URLChartsSection linkData={linkData} headingData={headingData} />
+          <URLChartsSection
+            linkData={linkData}
+            headingData={headingData}
+            isEmpty={linksAreEmpty}
+          />
 
           {/* Broken Links */}
           <BrokenLinksTable brokenUrls={result.broken_urls || []} />
