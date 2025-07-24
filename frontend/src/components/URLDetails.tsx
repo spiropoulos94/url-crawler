@@ -1,14 +1,15 @@
 import React, { useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useURL } from "../hooks/useURLs";
+import { useURL, useBulkAction } from "../hooks/useURLs";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { EmptyState } from "./EmptyState";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Square, RotateCcw, Trash2 } from "lucide-react";
 import { PageHeader } from "./layout/PageHeader";
 import { MetricOverview, BrokenLinksTable } from "./features";
 import { URLChartsSection } from "./features";
 import { StatusBadge } from "./ui/StatusBadge";
 import { Alert } from "./ui/Alert";
+import { Button } from "./ui/Button";
 
 export const URLDetails: React.FC = React.memo(() => {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +17,7 @@ export const URLDetails: React.FC = React.memo(() => {
   const urlId = parseInt(id || "0", 10);
 
   const { data, isLoading, error, refetch } = useURL(urlId);
+  const bulkActionMutation = useBulkAction();
 
   // Auto-refresh every 3 seconds if the URL is being crawled
   useEffect(() => {
@@ -31,6 +33,23 @@ export const URLDetails: React.FC = React.memo(() => {
 
   const url = data?.data;
   const result = url?.results?.[0];
+
+  const handleAction = (action: "stop" | "recrawl" | "delete") => {
+    if (!url) return;
+    
+    bulkActionMutation.mutate(
+      { ids: [url.id], action },
+      {
+        onSuccess: () => {
+          if (action === "delete") {
+            navigate("/dashboard");
+          } else {
+            refetch();
+          }
+        },
+      }
+    );
+  };
 
   const linkData = useMemo(
     () =>
@@ -126,6 +145,39 @@ export const URLDetails: React.FC = React.memo(() => {
             </Alert>
           </div>
         )}
+      </div>
+
+      {/* Actions */}
+      <div className="card p-4">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-600">Actions:</span>
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => handleAction("stop")}
+              disabled={bulkActionMutation.isPending || url.status === 'stopped'}
+              icon={Square}
+            >
+              Stop
+            </Button>
+            <Button
+              variant="success"
+              onClick={() => handleAction("recrawl")}
+              disabled={bulkActionMutation.isPending}
+              icon={RotateCcw}
+            >
+              Recrawl
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => handleAction("delete")}
+              disabled={bulkActionMutation.isPending}
+              icon={Trash2}
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
       </div>
 
       {!result ? (
