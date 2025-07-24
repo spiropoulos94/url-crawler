@@ -1,13 +1,5 @@
 import React from "react";
-import { Eye } from "lucide-react";
-import {
-  CheckboxCell,
-  TableCell,
-  Button,
-  Text,
-  Badge,
-  StatusBadge,
-} from "../ui";
+import { CheckboxCell, TableCell, Text, Badge, StatusBadge } from "../ui";
 import type { URL } from "../../types";
 
 export interface URLTableRowProps {
