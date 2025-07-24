@@ -67,20 +67,22 @@ func (r *urlRepository) GetAll(offset, limit int, search, sortBy, sortOrder stri
 	var urls []*models.URL
 	var total int64
 
-	query := r.db.Model(&models.URL{})
+	baseQuery := r.db.Model(&models.URL{}).
+		Select("urls.*, COALESCE(cr.internal_links, 0) as internal_links, COALESCE(cr.external_links, 0) as external_links, COALESCE(cr.broken_links, 0) as broken_links").
+		Joins("LEFT JOIN crawl_results cr ON urls.id = cr.url_id AND cr.id = (SELECT MAX(cr2.id) FROM crawl_results cr2 WHERE cr2.url_id = urls.id)")
 
 	if search != "" {
-		query = query.Where("url LIKE ? OR title LIKE ?", "%"+search+"%", "%"+search+"%")
+		baseQuery = baseQuery.Where("urls.url LIKE ? OR urls.title LIKE ?", "%"+search+"%", "%"+search+"%")
 	}
 
-	if err := query.Count(&total).Error; err != nil {
+	if err := baseQuery.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Build order clause
 	orderClause := r.buildOrderClause(sortBy, sortOrder)
 
-	err := query.Preload("Results").
+	// Execute query with pagination and sorting
+	err := baseQuery.Preload("Results").
 		Offset(offset).
 		Limit(limit).
 		Order(orderClause).
@@ -92,16 +94,19 @@ func (r *urlRepository) GetAll(offset, limit int, search, sortBy, sortOrder stri
 func (r *urlRepository) buildOrderClause(sortBy, sortOrder string) string {
 	// Validate sortBy field
 	allowedFields := map[string]string{
-		"url":        "url",
-		"title":      "title",
-		"status":     "status",
-		"created_at": "created_at",
-		"updated_at": "updated_at",
+		"url":            "urls.url",
+		"title":          "urls.title",
+		"status":         "urls.status",
+		"created_at":     "urls.created_at",
+		"updated_at":     "urls.updated_at",
+		"internal_links": "internal_links",
+		"external_links": "external_links",
+		"broken_links":   "broken_links",
 	}
 
 	field, exists := allowedFields[sortBy]
 	if !exists {
-		field = "created_at" // default
+		field = "urls.created_at" // default
 	}
 
 	// Validate sortOrder

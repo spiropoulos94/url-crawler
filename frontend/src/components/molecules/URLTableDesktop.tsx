@@ -78,9 +78,33 @@ export const URLTableDesktop: React.FC<URLTableDesktopProps> = ({
               Status
             </TableHeader>
 
-            <TableHeader>Internal Links</TableHeader>
-            <TableHeader>External Links</TableHeader>
-            <TableHeader>Broken Links</TableHeader>
+            <TableHeader
+              sortable
+              sortKey="internal_links"
+              currentSortBy={sortBy}
+              currentSortOrder={sortOrder}
+              onSort={onSort}
+            >
+              Internal Links
+            </TableHeader>
+            <TableHeader
+              sortable
+              sortKey="external_links"
+              currentSortBy={sortBy}
+              currentSortOrder={sortOrder}
+              onSort={onSort}
+            >
+              External Links
+            </TableHeader>
+            <TableHeader
+              sortable
+              sortKey="broken_links"
+              currentSortBy={sortBy}
+              currentSortOrder={sortOrder}
+              onSort={onSort}
+            >
+              Broken Links
+            </TableHeader>
 
             <TableHeader
               sortable
