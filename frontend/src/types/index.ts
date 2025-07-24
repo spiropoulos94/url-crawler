@@ -75,6 +75,12 @@ export interface AddURLRequest {
   url: string;
 }
 
+export interface AddURLResponse {
+  url: URL;
+  message?: string;
+  is_new: boolean;
+}
+
 export interface BulkActionRequest {
   ids: number[];
   action: 'stop' | 'delete' | 'recrawl';

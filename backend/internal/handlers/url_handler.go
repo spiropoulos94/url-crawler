@@ -39,13 +39,13 @@ func (h *URLHandler) AddURL(c *gin.Context) {
 		return
 	}
 
-	url, err := h.urlService.AddURL(req.URL)
+	result, err := h.urlService.AddURL(req.URL)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, url)
+	c.JSON(http.StatusCreated, result)
 }
 
 func (h *URLHandler) GetURL(c *gin.Context) {

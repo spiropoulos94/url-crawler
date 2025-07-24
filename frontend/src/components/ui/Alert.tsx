@@ -1,8 +1,8 @@
 import React from "react";
-import { AlertCircle, CheckCircle } from "lucide-react";
+import { AlertCircle, CheckCircle, Info } from "lucide-react";
 
 export interface AlertProps {
-  type: "success" | "error";
+  type: "success" | "error" | "info";
   message: string;
   className?: string;
 }
@@ -19,6 +19,12 @@ const alertConfig = {
     iconBg: "bg-red-100",
     iconColor: "text-red-600",
     icon: AlertCircle,
+  },
+  info: {
+    colors: "bg-blue-50 border-blue-200 text-blue-700",
+    iconBg: "bg-blue-100",
+    iconColor: "text-blue-600",
+    icon: Info,
   },
 };
 

@@ -15,6 +15,8 @@ export const AddURL: React.FC = React.memo(() => {
     errors,
     isSubmitting,
     isSuccess,
+    successMessage,
+    isNewURL,
     setFieldValue,
     handleSubmit,
   } = useAddURLForm();
@@ -67,10 +69,10 @@ export const AddURL: React.FC = React.memo(() => {
               </Button>
             </Flex>
 
-            {isSuccess && (
+            {isSuccess && successMessage && (
               <Alert
-                type="success"
-                message="URL added successfully! It will be crawled shortly."
+                type={isNewURL ? "success" : "info"}
+                message={successMessage}
               />
             )}
           </Stack>

@@ -10,8 +10,14 @@ import (
 	"gorm.io/gorm"
 )
 
+type AddURLResult struct {
+	URL     *models.URL `json:"url"`
+	Message string      `json:"message,omitempty"`
+	IsNew   bool        `json:"is_new"`
+}
+
 type URLService interface {
-	AddURL(urlStr string) (*models.URL, error)
+	AddURL(urlStr string) (*AddURLResult, error)
 	GetURL(id uint) (*models.URL, error)
 	GetAllURLs(page, pageSize int, search, sortBy, sortOrder string) ([]*models.URL, int64, error)
 	StartCrawling(ids []uint) error
@@ -32,7 +38,7 @@ func NewURLService(urlRepo repositories.URLRepository, queue QueueService) URLSe
 	}
 }
 
-func (s *urlService) AddURL(urlStr string) (*models.URL, error) {
+func (s *urlService) AddURL(urlStr string) (*AddURLResult, error) {
 	if !s.isValidURL(urlStr) {
 		return nil, errors.New("invalid URL format")
 	}
@@ -42,7 +48,11 @@ func (s *urlService) AddURL(urlStr string) (*models.URL, error) {
 	// First, check for existing active URL
 	existing, err := s.urlRepo.GetByURL(urlStr)
 	if err == nil {
-		return existing, nil
+		return &AddURLResult{
+			URL:     existing,
+			Message: "URL already exists",
+			IsNew:   false,
+		}, nil
 	}
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
@@ -66,7 +76,15 @@ func (s *urlService) AddURL(urlStr string) (*models.URL, error) {
 		}
 
 		// Return the restored URL
-		return s.urlRepo.GetByID(existingDeleted.ID)
+		restoredURL, err := s.urlRepo.GetByID(existingDeleted.ID)
+		if err != nil {
+			return nil, err
+		}
+		return &AddURLResult{
+			URL:     restoredURL,
+			Message: "URL restored and queued for crawling",
+			IsNew:   false,
+		}, nil
 	}
 
 	// Create new URL if no existing or deleted URL found
@@ -84,7 +102,11 @@ func (s *urlService) AddURL(urlStr string) (*models.URL, error) {
 		return nil, err
 	}
 
-	return newURL, nil
+	return &AddURLResult{
+		URL:     newURL,
+		Message: "URL added and queued for crawling",
+		IsNew:   true,
+	}, nil
 }
 
 func (s *urlService) GetURL(id uint) (*models.URL, error) {

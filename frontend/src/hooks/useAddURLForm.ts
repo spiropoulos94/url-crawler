@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAddURL } from './useURLs';
 import type { AxiosError } from 'axios';
+import type { AddURLResponse } from '../types';
 
 interface FormData {
   url: string;
@@ -14,6 +15,8 @@ export const useAddURLForm = () => {
   const [formData, setFormData] = useState<FormData>({ url: '' });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string>('');
+  const [isNewURL, setIsNewURL] = useState<boolean>(true);
   const addUrlMutation = useAddURL();
 
   const validateURL = (url: string): string | undefined => {
@@ -55,15 +58,20 @@ export const useAddURLForm = () => {
     }
 
     setIsSubmitting(true);
+    setSuccessMessage('');
 
     try {
-      await addUrlMutation.mutateAsync({
+      const response = await addUrlMutation.mutateAsync({
         url: formData.url.trim(),
-      });
+      }) as AddURLResponse;
 
       // Success! Reset form
       setFormData({ url: '' });
       setErrors({});
+      
+      // Set success message and track if URL is new
+      setSuccessMessage(response.message || (response.is_new ? 'URL added successfully! It will be crawled shortly.' : 'URL already exists in the system.'));
+      setIsNewURL(response.is_new);
       
       // Show success state briefly
       setTimeout(() => {
@@ -94,6 +102,8 @@ export const useAddURLForm = () => {
     setFormData({ url: '' });
     setErrors({});
     setIsSubmitting(false);
+    setSuccessMessage('');
+    setIsNewURL(true);
   };
 
   return {
@@ -101,6 +111,8 @@ export const useAddURLForm = () => {
     errors,
     isSubmitting,
     isSuccess: addUrlMutation.isSuccess && !isSubmitting,
+    successMessage,
+    isNewURL,
     setFieldValue,
     handleSubmit,
     reset,
