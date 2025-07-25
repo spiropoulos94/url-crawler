@@ -13,6 +13,7 @@
 ## 🔧 Backend Deep Dive (Go/Gin)
 
 ### **Technology Stack**
+
 - **Go 1.21** with Gin web framework
 - **GORM** for database operations
 - **MySQL 8.0** for data persistence
@@ -35,6 +36,7 @@
 ```
 
 ### **Directory Structure**
+
 ```
 backend/
 ├── cmd/main.go                 # Application entry point
@@ -66,6 +68,7 @@ backend/
 ### **Key Backend Components:**
 
 **1. Entry Point (`cmd/main.go`)**
+
 ```go
 // Initializes the entire application
 // Sets up database connections
@@ -73,11 +76,13 @@ backend/
 ```
 
 **2. API Server (`internal/api/server.go`)**
+
 - Sets up Gin router with middleware (CORS, logging, authentication)
 - Defines route groups (public vs protected)
 - Implements dependency injection pattern
 
 **3. Models (`internal/models/models.go`)**
+
 ```go
 type URL struct {
     ID        uint           `json:"id" gorm:"primaryKey"`
@@ -107,12 +112,14 @@ type CrawlResult struct {
 ```
 
 **4. Service Layer** - Business Logic Hub:
+
 - **AuthService**: JWT token management, bcrypt password hashing
 - **URLService**: URL validation, normalization, crawl orchestration
 - **CrawlerService**: Core web scraping with GoQuery
 - **QueueService**: Redis-based async job processing
 
 **5. Repository Layer** - Data Access:
+
 - Clean interface abstraction over GORM
 - Supports pagination, filtering, soft deletes
 - Handles complex queries with preloading
@@ -122,6 +129,7 @@ type CrawlResult struct {
 ## 🎨 Frontend Deep Dive (React/TypeScript)
 
 ### **Technology Stack**
+
 - **React 18** with TypeScript for type safety
 - **Vite** for lightning-fast development
 - **TailwindCSS** for utility-first styling
@@ -146,6 +154,7 @@ type CrawlResult struct {
 ```
 
 ### **Directory Structure**
+
 ```
 frontend/src/
 ├── components/                # React components
@@ -175,11 +184,19 @@ frontend/src/
 ### **Key Frontend Features:**
 
 **1. Smart Components with Custom Hooks**
+
 ```typescript
 // useURLs hook with React Query
 export const useURLs = (params: PaginationParams) => {
   return useQuery({
-    queryKey: ["urls", params.page, params.limit, params.search, params.sort_by, params.sort_order],
+    queryKey: [
+      "urls",
+      params.page,
+      params.limit,
+      params.search,
+      params.sort_by,
+      params.sort_order,
+    ],
     queryFn: () => urlAPI.getAll(params),
     placeholderData: (previousData) => previousData,
   });
@@ -193,23 +210,29 @@ export const useForm = <T extends Record<string, unknown>>(
   const [data, setData] = useState<T>(initialData);
   const [errors, setErrors] = useState<ValidationErrors<T>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Form validation and state management logic
 };
 ```
 
 **2. Responsive Design System**
+
 - Mobile-first approach with Tailwind breakpoints
 - Desktop table view + Mobile card view
 - Consistent gradient themes and color palette
 - Dark mode support preparation
 
 **3. Real-time Updates**
+
 ```typescript
 // Auto-refresh for active crawls every 5 seconds
 useEffect(() => {
   const interval = setInterval(() => {
-    if (data?.data?.urls?.some(url => ["queued", "running"].includes(url.status))) {
+    if (
+      data?.data?.urls?.some((url) =>
+        ["queued", "running"].includes(url.status)
+      )
+    ) {
       refetch();
     }
   }, 5000);
@@ -218,6 +241,7 @@ useEffect(() => {
 ```
 
 **4. Advanced Data Table Features**
+
 - Sortable columns with visual indicators
 - Search functionality with debouncing
 - Bulk actions (start, stop, delete, recrawl)
@@ -229,6 +253,7 @@ useEffect(() => {
 ## 🗄️ Database Schema & Relationships
 
 ### **Entity Relationship Diagram**
+
 ```
 User (1) ──── (*) URL (1) ──── (*) CrawlResult (1) ──── (*) BrokenURL
 ```
@@ -236,6 +261,7 @@ User (1) ──── (*) URL (1) ──── (*) CrawlResult (1) ──── 
 ### **Detailed Schema:**
 
 **Users Table** - Authentication:
+
 ```sql
 CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -248,6 +274,7 @@ CREATE TABLE users (
 ```
 
 **URLs Table** - Core entity:
+
 ```sql
 CREATE TABLE urls (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -264,6 +291,7 @@ CREATE TABLE urls (
 ```
 
 **CrawlResults Table** - Analysis data:
+
 ```sql
 CREATE TABLE crawl_results (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -291,6 +319,7 @@ CREATE TABLE crawl_results (
 ```
 
 **BrokenURLs Table** - Broken link details:
+
 ```sql
 CREATE TABLE broken_urls (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -311,24 +340,26 @@ CREATE TABLE broken_urls (
 ## 🔄 Complete Data Flow
 
 ### **1. URL Submission Flow**
+
 ```
 User Input → Frontend Form → API Validation → Database → Redis Queue → Background Worker
 ```
 
 **Frontend Process:**
+
 ```typescript
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
-  
+
   if (!form.validateForm()) return;
-  
+
   form.setIsSubmitting(true);
-  
+
   try {
     await addUrlMutation.mutateAsync({
       url: form.data.url.trim(),
     });
-    
+
     form.reset(); // Clear form on success
     // React Query automatically invalidates and refetches URL list
   } catch (error) {
@@ -336,7 +367,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     const axiosError = error as AxiosError<{ error: string }>;
     if (axiosError.response?.data?.error?.includes("Duplicate entry")) {
       form.setErrors({
-        url: "This URL already exists. If recently deleted, try again shortly."
+        url: "This URL already exists. If recently deleted, try again shortly.",
       });
     }
   } finally {
@@ -346,21 +377,22 @@ const handleSubmit = async (e: React.FormEvent) => {
 ```
 
 **Backend Process:**
+
 ```go
 func (s *urlService) AddURL(urlStr string) (*models.URL, error) {
     // 1. Validate URL format
     if !s.isValidURL(urlStr) {
         return nil, errors.New("invalid URL format")
     }
-    
+
     // 2. Normalize URL (add https://, remove trailing slash)
     urlStr = s.normalizeURL(urlStr)
-    
+
     // 3. Check for existing active URLs
     if existing, err := s.urlRepo.GetByURL(urlStr); err == nil {
         return existing, nil
     }
-    
+
     // 4. Check for soft-deleted URLs and restore them
     if existingDeleted, err := s.urlRepo.GetDeletedByURL(urlStr); err == nil {
         s.urlRepo.RestoreURL(existingDeleted.ID)
@@ -368,52 +400,54 @@ func (s *urlService) AddURL(urlStr string) (*models.URL, error) {
         s.queue.EnqueueCrawlJob(existingDeleted.ID)
         return s.urlRepo.GetByID(existingDeleted.ID)
     }
-    
+
     // 5. Create new URL record
     newURL := &models.URL{
         URL:    urlStr,
         Status: models.StatusQueued,
     }
-    
+
     // 6. Save to database
     if err := s.urlRepo.Create(newURL); err != nil {
         return nil, err
     }
-    
+
     // 7. Enqueue crawl job in Redis
     if err := s.queue.EnqueueCrawlJob(newURL.ID); err != nil {
         s.urlRepo.UpdateStatus(newURL.ID, models.StatusError)
         return nil, err
     }
-    
+
     return newURL, nil
 }
 ```
 
 ### **2. Crawling Process Flow**
+
 ```
 Redis Queue → Worker Pulls Job → HTTP Request → HTML Parsing → Analysis → Database Storage
 ```
 
 **Crawler Analysis Process:**
+
 ```go
 func (s *crawlerService) CrawlURL(urlID uint) error {
     // 1. Update status to "running"
     s.urlRepo.UpdateStatus(urlID, models.StatusRunning)
-    
+
     // 2. Fetch URL with timeout and user agent
     resp, err := s.httpClient.Get(url.URL)
     if err != nil {
         return s.handleCrawlError(urlID, err)
     }
     defer resp.Body.Close()
-    
+
     // 3. Parse HTML with GoQuery
     doc, err := goquery.NewDocumentFromReader(resp.Body)
     if err != nil {
         return s.handleCrawlError(urlID, err)
     }
-    
+
     // 4. Extract comprehensive data
     result := &models.CrawlResult{
         URLID:         urlID,
@@ -427,21 +461,22 @@ func (s *crawlerService) CrawlURL(urlID uint) error {
         H6Count:       doc.Find("h6").Length(),
         HasLoginForm:  s.detectLoginForm(doc),
     }
-    
+
     // 5. Analyze links (internal vs external, check for broken links)
     s.analyzeLinks(doc, result, url.URL)
-    
+
     // 6. Save results to database
     s.crawlResultRepo.Create(result)
-    
+
     // 7. Update URL status to "done"
     s.urlRepo.UpdateStatus(urlID, models.StatusDone)
-    
+
     return nil
 }
 ```
 
 **Link Analysis Features:**
+
 - **HTML Version Detection**: Parses DOCTYPE declaration
 - **Title Extraction**: Gets `<title>` tag content with fallback to H1
 - **Heading Analysis**: Counts H1-H6 elements for SEO analysis
@@ -450,20 +485,26 @@ func (s *crawlerService) CrawlURL(urlID uint) error {
 - **Login Form Detection**: Searches for authentication-related keywords and input types
 
 ### **3. Real-time UI Updates**
+
 ```
 Database Changes → API Polling → React Query Cache → Component Re-render
 ```
 
 **Frontend Polling Strategy:**
+
 ```typescript
 // Smart polling - only when there are active crawls
 useEffect(() => {
   const interval = setInterval(() => {
-    if (data?.data?.urls?.some((url) => ["queued", "running"].includes(url.status))) {
+    if (
+      data?.data?.urls?.some((url) =>
+        ["queued", "running"].includes(url.status)
+      )
+    ) {
       refetch(); // React Query refetch
     }
   }, 5000); // Poll every 5 seconds
-  
+
   return () => clearInterval(interval);
 }, [data?.data?.urls, refetch]);
 ```
@@ -473,8 +514,9 @@ useEffect(() => {
 ## 🐳 Docker & Infrastructure
 
 ### **Docker Compose Architecture**
+
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   mysql:
@@ -505,7 +547,7 @@ services:
       - redis_data:/data
 
   backend:
-    build: 
+    build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: sykell_backend
@@ -518,7 +560,7 @@ services:
       DATABASE_URL: sykell:password@tcp(mysql:3306)/sykell_crawler?charset=utf8mb4&parseTime=True&loc=Local
       REDIS_URL: redis:6379
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
-      FRONTEND_URL: http://localhost:3000
+      FRONTEND_URL: http://localhost:5173
       PORT: 8080
     ports:
       - "8080:8080"
@@ -530,6 +572,7 @@ volumes:
 ```
 
 ### **Database Initialization Script**
+
 ```sql
 -- scripts/init.sql
 CREATE DATABASE IF NOT EXISTS sykell_crawler;
@@ -548,6 +591,7 @@ FLUSH PRIVILEGES;
 ```
 
 ### **Backend Dockerfile**
+
 ```dockerfile
 FROM golang:1.21-alpine AS builder
 
@@ -573,6 +617,7 @@ CMD ["./main"]
 ## 🔐 Security & Configuration
 
 ### **Authentication Flow**
+
 ```
 1. User Registration/Login → bcrypt password hashing
 2. JWT Token Generation → 7-day expiration with secure secret
@@ -582,6 +627,7 @@ CMD ["./main"]
 ```
 
 **JWT Implementation:**
+
 ```go
 // Generate JWT token
 func (s *authService) GenerateToken(userID uint) (string, error) {
@@ -590,7 +636,7 @@ func (s *authService) GenerateToken(userID uint) (string, error) {
         "exp":     time.Now().Add(7 * 24 * time.Hour).Unix(), // 7 days
         "iat":     time.Now().Unix(),
     })
-    
+
     return token.SignedString([]byte(s.jwtSecret))
 }
 
@@ -598,17 +644,17 @@ func (s *authService) GenerateToken(userID uint) (string, error) {
 func (h *AuthHandler) JWTMiddleware() gin.HandlerFunc {
     return func(c *gin.Context) {
         tokenString := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
-        
+
         token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
             return []byte(h.jwtSecret), nil
         })
-        
+
         if err != nil || !token.Valid {
             c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
             c.Abort()
             return
         }
-        
+
         claims := token.Claims.(jwt.MapClaims)
         c.Set("user_id", uint(claims["user_id"].(float64)))
         c.Next()
@@ -619,6 +665,7 @@ func (h *AuthHandler) JWTMiddleware() gin.HandlerFunc {
 ### **Environment Configuration**
 
 **Backend Environment Variables:**
+
 ```bash
 # Database Configuration
 DATABASE_URL=sykell:password@tcp(mysql:3306)/sykell_crawler?charset=utf8mb4&parseTime=True&loc=Local
@@ -637,8 +684,8 @@ PORT=8080
 GIN_MODE=release        # Set to 'debug' for development
 
 # CORS Configuration
-FRONTEND_URL=http://localhost:3000
-ALLOWED_ORIGINS=http://localhost:3000,https://yourdomain.com
+FRONTEND_URL=http://localhost:5173
+ALLOWED_ORIGINS=http://localhost:5173,https://yourdomain.com
 
 # Crawler Configuration
 CRAWLER_TIMEOUT=30s
@@ -647,6 +694,7 @@ MAX_CONCURRENT_CRAWLS=10
 ```
 
 **Frontend Environment Variables:**
+
 ```bash
 # API Configuration
 VITE_API_URL=http://localhost:8080/api/v1
@@ -678,6 +726,7 @@ VITE_ENABLE_DEBUG=false
 ### **Local Development Setup**
 
 **1. Prerequisites:**
+
 ```bash
 # Backend requirements
 Go 1.21+
@@ -693,6 +742,7 @@ Docker & Docker Compose
 ```
 
 **2. Backend Development:**
+
 ```bash
 cd backend
 
@@ -716,6 +766,7 @@ go run cmd/main.go
 ```
 
 **3. Frontend Development:**
+
 ```bash
 cd frontend
 
@@ -728,7 +779,7 @@ cp .env.example .env.local
 
 # Start development server with hot reload
 npm run dev
-# Server starts on http://localhost:3000
+# Server starts on http://localhost:5173
 
 # Other useful commands
 npm run build     # Production build
@@ -738,6 +789,7 @@ npm run type-check # TypeScript checking
 ```
 
 **4. Full Stack Development with Docker:**
+
 ```bash
 # Start all services
 docker-compose up --build
@@ -756,12 +808,14 @@ docker-compose down -v
 ### **API Endpoints Reference**
 
 **Authentication Endpoints:**
+
 ```
 POST   /api/v1/auth/register    # User registration
 POST   /api/v1/auth/login       # User login
 ```
 
 **Protected URL Management Endpoints:**
+
 ```
 GET    /api/v1/urls             # List URLs with pagination/filtering
 POST   /api/v1/urls             # Add new URL for crawling
@@ -770,6 +824,7 @@ POST   /api/v1/urls/bulk        # Bulk operations (start/stop/delete/recrawl)
 ```
 
 **Query Parameters for GET /api/v1/urls:**
+
 ```
 ?page=1                  # Page number (default: 1)
 &limit=10               # Items per page (default: 10, max: 100)
@@ -779,6 +834,7 @@ POST   /api/v1/urls/bulk        # Bulk operations (start/stop/delete/recrawl)
 ```
 
 **Example API Responses:**
+
 ```json
 // GET /api/v1/urls
 {
@@ -814,6 +870,7 @@ POST   /api/v1/urls/bulk        # Bulk operations (start/stop/delete/recrawl)
 ### **Testing Strategy**
 
 **Backend Testing:**
+
 ```bash
 # Unit tests
 go test ./internal/...
@@ -827,6 +884,7 @@ go tool cover -html=coverage.out
 ```
 
 **Frontend Testing:**
+
 ```bash
 # Unit tests with Vitest
 npm run test
@@ -846,6 +904,7 @@ npm run test:coverage
 ## 📊 Performance Considerations
 
 ### **Backend Optimizations:**
+
 1. **Database Indexing**: Strategic indexes on frequently queried columns
 2. **Connection Pooling**: GORM connection pool with proper limits
 3. **Query Optimization**: Preloading relationships to avoid N+1 queries
@@ -854,6 +913,7 @@ npm run test:coverage
 6. **Rate Limiting**: Prevent API abuse and crawl target overloading
 
 ### **Frontend Optimizations:**
+
 1. **Code Splitting**: Lazy loading of route components
 2. **React Query Caching**: Intelligent server state caching
 3. **Optimistic Updates**: Immediate UI feedback for better UX
@@ -862,6 +922,7 @@ npm run test:coverage
 6. **Bundle Optimization**: Tree shaking and dead code elimination
 
 ### **Monitoring & Observability:**
+
 ```bash
 # Application metrics
 - Response times
@@ -884,6 +945,7 @@ npm run test:coverage
 ### **Production Deployment:**
 
 **1. Environment Preparation:**
+
 ```bash
 # Production environment variables
 export DATABASE_URL="user:pass@tcp(prod-mysql:3306)/sykell_crawler"
@@ -894,6 +956,7 @@ export FRONTEND_URL="https://your-domain.com"
 ```
 
 **2. Database Setup:**
+
 ```sql
 -- Production database with optimizations
 CREATE DATABASE sykell_crawler CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -904,6 +967,7 @@ CREATE INDEX idx_crawl_results_latest ON crawl_results(url_id, created_at DESC);
 ```
 
 **3. Docker Production Build:**
+
 ```bash
 # Multi-stage build for smaller images
 docker build -t sykell-backend:latest ./backend
@@ -916,6 +980,7 @@ docker-compose -f docker-compose.prod.yml up -d
 ### **Scaling Strategies:**
 
 **Horizontal Scaling:**
+
 1. **Load Balancer**: Nginx/HAProxy for backend API
 2. **Database Replication**: Master-slave setup for read scaling
 3. **Redis Cluster**: For high-availability job processing
@@ -923,6 +988,7 @@ docker-compose -f docker-compose.prod.yml up -d
 5. **Microservices Split**: Separate crawler service
 
 **Vertical Scaling:**
+
 1. **Database Optimization**: Query tuning and indexing
 2. **Memory Management**: Go garbage collection tuning
 3. **CPU Utilization**: Concurrent crawling limits
@@ -935,17 +1001,20 @@ This architecture demonstrates **production-ready practices** with proper separa
 ## 📚 Additional Resources
 
 **Documentation:**
+
 - [Go Gin Framework](https://gin-gonic.com/)
 - [GORM Documentation](https://gorm.io/)
 - [React Query Guide](https://tanstack.com/query/latest)
 - [TailwindCSS Documentation](https://tailwindcss.com/)
 
 **Best Practices:**
+
 - [Go Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
 - [React TypeScript Cheatsheet](https://react-typescript-cheatsheet.netlify.app/)
 - [Database Design Principles](https://en.wikipedia.org/wiki/Database_design)
 
 **Security Guidelines:**
+
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [JWT Best Practices](https://auth0.com/blog/a-look-at-the-latest-draft-for-jwt-bcp/)
 - [Go Security Checklist](https://github.com/Checkmarx/Go-SCP)

@@ -71,7 +71,7 @@ A full-stack web application that crawls websites and provides detailed analysis
 
 3. **Access the application**
 
-   - Frontend: http://localhost:3000
+   - Frontend: http://localhost:5173
    - Backend API: http://localhost:8080
    - Health check: http://localhost:8080/health
 
@@ -154,7 +154,7 @@ Click any URL to view:
 DATABASE_URL=sykell:password@tcp(localhost:3307)/sykell_crawler?charset=utf8mb4&parseTime=True&loc=Local
 REDIS_URL=localhost:6379
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
-FRONTEND_URL=http://localhost:3000
+FRONTEND_URL=http://localhost:5173
 PORT=8080
 ```
 

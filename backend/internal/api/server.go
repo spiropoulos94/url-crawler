@@ -3,10 +3,12 @@ package api
 import (
 	"context"
 	"log"
+	"net/http"
 	"sykell-crawler/internal/handlers"
 	"sykell-crawler/internal/repositories"
 	"sykell-crawler/internal/services"
 	"sykell-crawler/pkg/config"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
@@ -25,7 +27,7 @@ func NewServer(db *gorm.DB, redis *redis.Client, cfg *config.Config) *Server {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
-	router.Use(handlers.CORSMiddleware())
+	router.Use(handlers.CORSMiddleware(cfg))
 
 	s := &Server{
 		router: router,
@@ -72,9 +74,7 @@ func (s *Server) setupRoutes() {
 		}
 	}
 
-	s.router.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{"status": "ok"})
-	})
+	s.router.GET("/health", s.healthCheck)
 }
 
 func (s *Server) startBackgroundWorkers() {
@@ -90,6 +90,54 @@ func (s *Server) startBackgroundWorkers() {
 			log.Printf("Crawler worker error: %v", err)
 		}
 	}()
+}
+
+func (s *Server) healthCheck(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	health := gin.H{
+		"status":    "ok",
+		"timestamp": time.Now().Unix(),
+		"checks": gin.H{
+			"database": s.checkDatabase(ctx),
+			"redis":    s.checkRedis(ctx),
+		},
+	}
+
+	// Determine overall status
+	dbStatus := health["checks"].(gin.H)["database"].(gin.H)["status"]
+	redisStatus := health["checks"].(gin.H)["redis"].(gin.H)["status"]
+
+	if dbStatus != "ok" || redisStatus != "ok" {
+		health["status"] = "degraded"
+		c.JSON(http.StatusServiceUnavailable, health)
+		return
+	}
+
+	c.JSON(http.StatusOK, health)
+}
+
+func (s *Server) checkDatabase(ctx context.Context) gin.H {
+	sqlDB, err := s.db.DB()
+	if err != nil {
+		return gin.H{"status": "error", "message": "failed to get database connection"}
+	}
+
+	if err := sqlDB.PingContext(ctx); err != nil {
+		return gin.H{"status": "error", "message": "database ping failed"}
+	}
+
+	return gin.H{"status": "ok"}
+}
+
+func (s *Server) checkRedis(ctx context.Context) gin.H {
+	_, err := s.redis.Ping(ctx).Result()
+	if err != nil {
+		return gin.H{"status": "error", "message": "redis ping failed"}
+	}
+
+	return gin.H{"status": "ok"}
 }
 
 func (s *Server) Run(addr string) error {
