@@ -10,6 +10,7 @@ import type {
   User,
   PaginationParams,
 } from "../types";
+import { getErrorMessage, handleAuthError } from "../utils/errorHandler";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:8080/api/v1";
@@ -29,17 +30,35 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      window.location.href = "/login";
+/**
+ * Connects the API layer to React's error context for global error handling.
+ * This bridges axios interceptors (imperative) with React context (declarative).
+ * Returns a cleanup function to remove the interceptor.
+ */
+export function setupErrorInterceptor(showError: (message: string) => void) {
+  const interceptor = api.interceptors.response.use(
+    // Success: pass response through unchanged
+    (response) => response,
+    // Error: handle globally, then still reject for local handling
+    (error) => {
+      if (error.response?.status === 401) {
+        // Auth errors: redirect to login (don't show toast)
+        handleAuthError();
+      } else {
+        // Other errors: show user-friendly message in toast
+        const message = getErrorMessage(error);
+        showError(message);
+      }
+      // Always reject so components can still handle errors locally if needed
+      return Promise.reject(error);
     }
-    return Promise.reject(error);
-  }
-);
+  );
+
+  // Return cleanup function to remove this specific interceptor
+  return () => {
+    api.interceptors.response.eject(interceptor);
+  };
+}
 
 export const authAPI = {
   login: (data: LoginRequest): Promise<AxiosResponse<AuthResponse>> =>

@@ -6,6 +6,8 @@ import { Dashboard } from "./components/Dashboard";
 import { URLDetails } from "./components/URLDetails";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AuthProvider, useAuth } from "./components/providers/AuthProvider";
+import { ErrorProvider } from "./contexts/ErrorContext";
+import { GlobalErrorToast } from "./components/GlobalErrorToast";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,6 +38,16 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   return <Layout>{children}</Layout>;
+}
+
+// App wrapper
+function AppWrapper() {
+  return (
+    <>
+      <AppRoutes />
+      <GlobalErrorToast />
+    </>
+  );
 }
 
 // App Routes component
@@ -85,13 +97,15 @@ function AppRoutes() {
 function App() {
   return (
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <AuthProvider>
-            <AppRoutes />
-          </AuthProvider>
-        </BrowserRouter>
-      </QueryClientProvider>
+      <ErrorProvider>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <AuthProvider>
+              <AppWrapper />
+            </AuthProvider>
+          </BrowserRouter>
+        </QueryClientProvider>
+      </ErrorProvider>
     </ErrorBoundary>
   );
 }
