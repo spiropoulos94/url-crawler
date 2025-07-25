@@ -14,7 +14,13 @@ export function GlobalErrorToast() {
   if (!error) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 bg-red-600 text-white p-3 rounded shadow-lg z-50">
+    <div 
+      className="fixed bottom-4 right-4 bg-red-600 text-white p-3 rounded shadow-lg z-50"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <span className="sr-only">Error: </span>
       {error}
     </div>
   );

@@ -31,6 +31,8 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
         gap="sm"
         align="center"
         className="sm:flex-row sm:items-center sm:justify-between"
+        role="navigation"
+        aria-label="Pagination Navigation"
       >
         <Container className="text-center sm:text-left">
           <Text
@@ -59,13 +61,19 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
             disabled={currentPage === 1}
             icon={ChevronLeft}
             className="px-2 sm:px-4 py-2 text-xs sm:text-sm"
+            aria-label={`Go to previous page, page ${currentPage - 1}`}
           >
             <Text className="hidden xs:inline text-xs sm:text-sm">
               Previous
             </Text>
           </Button>
 
-          <Container className="px-2 sm:px-4 py-2 bg-white rounded-lg border border-gray-300">
+          <Container 
+            className="px-2 sm:px-4 py-2 bg-white rounded-lg border border-gray-300"
+            role="status"
+            aria-live="polite"
+            aria-label={`Current page ${currentPage} of ${totalPages}`}
+          >
             <Text
               variant="body"
               className="text-xs sm:text-sm font-bold text-gray-700 whitespace-nowrap"
@@ -82,6 +90,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
             disabled={currentPage === totalPages}
             icon={ChevronRight}
             className="px-2 sm:px-4 py-2 text-xs sm:text-sm"
+            aria-label={`Go to next page, page ${currentPage + 1}`}
           >
             <Text className="hidden xs:inline text-xs sm:text-sm">Next</Text>
           </Button>

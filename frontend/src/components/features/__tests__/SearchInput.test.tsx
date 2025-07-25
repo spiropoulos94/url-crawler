@@ -1,4 +1,5 @@
-import { render, screen, act, userEvent } from '../../../test-utils';
+import { render, screen, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { SearchInput } from '../SearchInput';
 import { vi } from 'vitest';
 
@@ -21,7 +22,7 @@ describe('SearchInput', () => {
     const onChange = vi.fn();
     render(<SearchInput value="" onChange={onChange} debounceMs={100} />);
     
-    const input = screen.getByRole('textbox');
+    const input = screen.getByRole('searchbox');
     
     // Type in the input
     await user.type(input, 'test');

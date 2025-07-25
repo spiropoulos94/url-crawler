@@ -1,6 +1,5 @@
 import React from 'react';
 import { Badge } from './Badge';
-import { Container } from './Layout';
 
 export type StatusType = 'queued' | 'running' | 'done' | 'error' | 'stopped';
 
@@ -35,8 +34,23 @@ const statusConfig = {
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = '' }) => {
   const config = statusConfig[status];
   
+  const getStatusDescription = (status: StatusType) => {
+    switch (status) {
+      case 'queued': return 'Crawl request is queued and waiting to start';
+      case 'running': return 'Currently crawling and analyzing the website';
+      case 'done': return 'Website crawl completed successfully';
+      case 'error': return 'An error occurred during website crawling';
+      case 'stopped': return 'Website crawling has been stopped';
+      default: return `Status: ${status}`;
+    }
+  };
+  
   return (
-    <Badge variant={config.variant} className={`shadow-sm ${className}`}>
+    <Badge 
+      variant={config.variant} 
+      className={`shadow-sm ${className}`}
+      aria-label={getStatusDescription(status)}
+    >
       {status}
     </Badge>
   );
@@ -44,7 +58,23 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
 
 export const StatusIndicatorBar: React.FC<StatusBadgeProps> = ({ status }) => {
   const config = statusConfig[status];
+  
+  const getStatusDescription = (status: StatusType) => {
+    switch (status) {
+      case 'queued': return 'Queued for processing';
+      case 'running': return 'Currently processing';
+      case 'done': return 'Processing completed';
+      case 'error': return 'Processing failed';
+      case 'stopped': return 'Processing stopped';
+      default: return `Status: ${status}`;
+    }
+  };
+  
   return (
-    <Container className={`h-1 rounded-t-2xl ${config.gradient}`} />
+    <div 
+      className={`h-1 rounded-t-2xl ${config.gradient}`}
+      role="img"
+      aria-label={getStatusDescription(status)}
+    />
   );
 };

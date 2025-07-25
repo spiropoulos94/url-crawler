@@ -34,14 +34,26 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 export const LoadingSkeleton: React.FC<{ className?: string }> = ({
   className = "",
 }) => {
-  return <div className={`animate-pulse bg-gray-200 rounded ${className}`} />;
+  return (
+    <div 
+      className={`animate-pulse bg-gray-200 rounded ${className}`}
+      role="presentation"
+      aria-hidden="true"
+    />
+  );
 };
 
 export const TableLoadingSkeleton: React.FC = () => {
   return (
-    <div className="space-y-3">
+    <div 
+      className="space-y-3"
+      role="status"
+      aria-label="Loading table data"
+      aria-live="polite"
+    >
+      <div className="sr-only">Loading table content, please wait...</div>
       {[...Array(5)].map((_, i) => (
-        <div key={i} className="flex space-x-3 p-3">
+        <div key={i} className="flex space-x-3 p-3" aria-hidden="true">
           <LoadingSkeleton className="h-3 w-3" />
           <LoadingSkeleton className="h-3 flex-1" />
           <LoadingSkeleton className="h-3 w-20" />

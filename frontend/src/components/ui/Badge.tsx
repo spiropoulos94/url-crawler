@@ -5,6 +5,8 @@ export interface BadgeProps {
   variant?: "primary" | "secondary" | "success" | "warning" | "danger" | "info";
   size?: "sm" | "md" | "lg";
   className?: string;
+  "aria-label"?: string;
+  role?: string;
 }
 
 export const Badge: React.FC<BadgeProps> = ({
@@ -12,6 +14,8 @@ export const Badge: React.FC<BadgeProps> = ({
   variant = "secondary",
   size = "md",
   className = "",
+  "aria-label": ariaLabel,
+  role,
 }) => {
   const baseClasses = "inline-flex items-center font-medium rounded-full";
 
@@ -33,5 +37,13 @@ export const Badge: React.FC<BadgeProps> = ({
   const combinedClassName =
     `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`.trim();
 
-  return <span className={combinedClassName}>{children}</span>;
+  return (
+    <span 
+      className={combinedClassName}
+      aria-label={ariaLabel}
+      role={role || "img"}
+    >
+      {children}
+    </span>
+  );
 };

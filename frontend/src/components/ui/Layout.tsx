@@ -3,6 +3,9 @@ import React from "react";
 export interface ContainerProps {
   children: React.ReactNode;
   className?: string;
+  role?: string;
+  "aria-live"?: "polite" | "assertive";
+  "aria-label"?: string;
 }
 
 export interface FlexProps {
@@ -13,6 +16,9 @@ export interface FlexProps {
   gap?: "none" | "xs" | "sm" | "md" | "lg" | "xl";
   wrap?: boolean;
   className?: string;
+  role?: string;
+  "aria-label"?: string;
+  id?: string;
 }
 
 export interface GridProps {
@@ -20,6 +26,9 @@ export interface GridProps {
   cols?: 1 | 2 | 3 | 4 | 5 | 6 | 12;
   gap?: "none" | "xs" | "sm" | "md" | "lg" | "xl";
   className?: string;
+  role?: string;
+  "aria-label"?: string;
+  id?: string;
 }
 
 export interface StackProps {
@@ -31,8 +40,9 @@ export interface StackProps {
 export const Container: React.FC<ContainerProps> = ({
   children,
   className = "",
+  ...ariaProps
 }) => {
-  return <div className={className}>{children}</div>;
+  return <div className={className} {...ariaProps}>{children}</div>;
 };
 
 export const Flex: React.FC<FlexProps> = ({
@@ -43,6 +53,7 @@ export const Flex: React.FC<FlexProps> = ({
   gap = "none",
   wrap = false,
   className = "",
+  ...ariaProps
 }) => {
   const directionClasses = {
     row: "flex-row",
@@ -78,7 +89,7 @@ export const Flex: React.FC<FlexProps> = ({
   const combinedClassName =
     `flex ${directionClasses[direction]} ${alignClasses[align]} ${justifyClasses[justify]} ${gapClasses[gap]} ${wrapClass} ${className}`.trim();
 
-  return <div className={combinedClassName}>{children}</div>;
+  return <div className={combinedClassName} {...ariaProps}>{children}</div>;
 };
 
 export const Grid: React.FC<GridProps> = ({
@@ -86,6 +97,7 @@ export const Grid: React.FC<GridProps> = ({
   cols = 1,
   gap = "none",
   className = "",
+  ...ariaProps
 }) => {
   const colsClasses = {
     1: "grid-cols-1",
@@ -109,7 +121,7 @@ export const Grid: React.FC<GridProps> = ({
   const combinedClassName =
     `grid ${colsClasses[cols]} ${gapClasses[gap]} ${className}`.trim();
 
-  return <div className={combinedClassName}>{children}</div>;
+  return <div className={combinedClassName} {...ariaProps}>{children}</div>;
 };
 
 export const Stack: React.FC<StackProps> = ({

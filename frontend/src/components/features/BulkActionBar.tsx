@@ -39,7 +39,22 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({
   ];
 
   return (
-    <Container className="w-full">
+    <Container 
+      className="w-full"
+      role="toolbar"
+      aria-label={`Bulk actions for ${selectedCount} selected items`}
+      aria-describedby="bulk-action-description"
+    >
+      <div className="mb-2">
+        <Text 
+          id="bulk-action-description"
+          variant="caption" 
+          className="text-gray-600 font-medium"
+        >
+          {selectedCount} item{selectedCount === 1 ? '' : 's'} selected
+        </Text>
+      </div>
+      
       <Grid
         cols={2}
         className="xs:grid-cols-4 gap-2 sm:flex sm:flex-wrap sm:gap-3 sm:justify-start"
@@ -52,6 +67,7 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({
             disabled={disabled}
             icon={action.icon}
             className="text-xs xs:text-sm px-3 py-2.5 justify-center"
+            aria-label={`${action.label} ${selectedCount} selected item${selectedCount === 1 ? '' : 's'}`}
           >
             <Text className="hidden xs:inline text-xs xs:text-sm">
               {action.label}

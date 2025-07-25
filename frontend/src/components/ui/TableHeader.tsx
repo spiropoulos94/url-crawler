@@ -40,6 +40,13 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
     }
   };
 
+  const getSortAriaSort = () => {
+    if (!sortable || !sortKey || currentSortBy !== sortKey) {
+      return sortable ? 'none' : undefined;
+    }
+    return currentSortOrder === "asc" ? "ascending" : "descending";
+  };
+
   return (
     <th
       className={`px-4 py-3 text-left ${
@@ -48,6 +55,17 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           : ""
       } ${className}`}
       onClick={handleClick}
+      role="columnheader"
+      aria-sort={getSortAriaSort()}
+      {...(sortable && { tabIndex: 0, "aria-label": `Sort by ${children}` })}
+      {...(sortable && {
+        onKeyDown: (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleClick();
+          }
+        },
+      })}
     >
       <Flex align="center" gap="sm">
         <Text
@@ -56,7 +74,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
         >
           {children}
         </Text>
-        {getSortIcon()}
+        <span aria-hidden="true">{getSortIcon()}</span>
       </Flex>
     </th>
   );

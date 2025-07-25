@@ -40,12 +40,22 @@ export const URLTableDesktop: React.FC<URLTableDesktopProps> = ({
 
   return (
     <Container className={`hidden lg:block overflow-x-auto ${className}`}>
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-          <tr>
+      <table 
+        className="min-w-full divide-y divide-gray-200"
+        role="table"
+        aria-label="Website URLs data table"
+        aria-rowcount={urls.length + 1}
+        aria-colcount={8}
+      >
+        <thead 
+          className="bg-gradient-to-r from-gray-50 to-gray-100"
+          role="rowgroup"
+        >
+          <tr role="row">
             <CheckboxCell
               checked={isAllSelected}
               onChange={handleSelectAllChange}
+              isSelectAll={true}
             />
 
             <TableHeader
@@ -118,8 +128,11 @@ export const URLTableDesktop: React.FC<URLTableDesktopProps> = ({
           </tr>
         </thead>
 
-        <tbody className="bg-white divide-y divide-gray-100">
-          {urls.map((url) => (
+        <tbody 
+          className="bg-white divide-y divide-gray-100"
+          role="rowgroup"
+        >
+          {urls.map((url, index) => (
             <URLTableRow
               key={url.id}
               url={url}
@@ -127,6 +140,7 @@ export const URLTableDesktop: React.FC<URLTableDesktopProps> = ({
               onToggleSelection={onToggleSelection}
               onNavigate={onNavigate}
               clickable={true}
+              rowIndex={index + 2}
             />
           ))}
         </tbody>

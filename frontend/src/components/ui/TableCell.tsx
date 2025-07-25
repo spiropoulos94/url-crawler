@@ -7,6 +7,7 @@ export interface TableCellProps {
   truncate?: boolean;
   title?: string;
   onClick?: () => void;
+  role?: string;
 }
 
 export const TableCell: React.FC<TableCellProps> = ({
@@ -16,6 +17,7 @@ export const TableCell: React.FC<TableCellProps> = ({
   truncate = false,
   title,
   onClick,
+  role,
 }) => {
   const maxWidthClasses = {
     xs: "max-w-xs",
@@ -35,7 +37,7 @@ export const TableCell: React.FC<TableCellProps> = ({
     .join(" ");
 
   return (
-    <td className={cellClasses} title={title} onClick={onClick}>
+    <td className={cellClasses} title={title} onClick={onClick} role={role}>
       {truncate ? <div className="truncate">{children}</div> : children}
     </td>
   );

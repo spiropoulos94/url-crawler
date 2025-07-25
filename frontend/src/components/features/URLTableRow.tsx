@@ -9,6 +9,7 @@ export interface URLTableRowProps {
   onToggleSelection: (id: number) => void;
   onNavigate: (id: number) => void;
   clickable?: boolean;
+  rowIndex?: number;
 }
 
 export const URLTableRow: React.FC<URLTableRowProps> = ({
@@ -17,6 +18,7 @@ export const URLTableRow: React.FC<URLTableRowProps> = ({
   onToggleSelection,
   onNavigate,
   clickable = true,
+  rowIndex,
 }) => {
   const latestResult = url.results?.[0];
 
@@ -38,13 +40,27 @@ export const URLTableRow: React.FC<URLTableRowProps> = ({
         clickable ? "cursor-pointer" : ""
       }`}
       onClick={handleRowClick}
+      role="row"
+      aria-selected={isSelected}
+      aria-rowindex={rowIndex}
+      {...(clickable && {
+        tabIndex: 0,
+        "aria-label": `URL: ${url.url}, Status: ${url.status}`,
+        onKeyDown: (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            onNavigate(url.id);
+          }
+        },
+      })}
     >
       <CheckboxCell
         checked={isSelected}
         onChange={() => onToggleSelection(url.id)}
+        aria-label={`Select URL ${url.url}`}
       />
 
-      <TableCell maxWidth="xs" truncate title={url.url}>
+      <TableCell maxWidth="xs" truncate title={url.url} role="cell">
         <Text variant="body" className="text-sm font-medium text-gray-900">
           {url.url}
         </Text>
@@ -54,45 +70,48 @@ export const URLTableRow: React.FC<URLTableRowProps> = ({
         maxWidth="xs"
         truncate
         title={url.title || latestResult?.title || "-"}
+        role="cell"
       >
         <Text variant="body" className="text-sm text-gray-700 font-medium">
           {url.title || latestResult?.title || "-"}
         </Text>
       </TableCell>
 
-      <TableCell>
+      <TableCell role="cell">
         <div className="flex items-center gap-2">
           <StatusBadge status={url.status} />
           {url.status === 'error' && url.error_message && (
             <div 
               className="text-red-500 cursor-help" 
               title={url.error_message}
+              role="img"
+              aria-label={`Error: ${url.error_message}`}
             >
-              <AlertTriangle className="h-4 w-4" />
+              <AlertTriangle className="h-4 w-4" aria-hidden="true" />
             </div>
           )}
         </div>
       </TableCell>
 
-      <TableCell>
+      <TableCell role="cell">
         <Badge variant="info" size="sm">
           {latestResult?.internal_links ?? "-"}
         </Badge>
       </TableCell>
 
-      <TableCell>
+      <TableCell role="cell">
         <Badge variant="success" size="sm">
           {latestResult?.external_links ?? "-"}
         </Badge>
       </TableCell>
 
-      <TableCell>
+      <TableCell role="cell">
         <Badge variant="danger" size="sm">
           {latestResult?.broken_links ?? "-"}
         </Badge>
       </TableCell>
 
-      <TableCell>
+      <TableCell role="cell">
         <Text variant="body" className="text-sm text-gray-600 font-medium">
           {new Date(url.created_at).toLocaleDateString()}
         </Text>

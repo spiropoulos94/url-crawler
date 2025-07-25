@@ -4,12 +4,20 @@ export interface CardProps {
   children: React.ReactNode;
   className?: string;
   variant?: "default" | "interactive";
+  role?: string;
+  "aria-labelledby"?: string;
+  "aria-describedby"?: string;
+  tabIndex?: number;
 }
 
 export const Card: React.FC<CardProps> = ({
   children,
   className = "",
   variant = "default",
+  role,
+  "aria-labelledby": ariaLabelledBy,
+  "aria-describedby": ariaDescribedBy,
+  tabIndex,
 }) => {
   const baseClasses = "bg-white rounded-lg border border-gray-200";
   const variants = {
@@ -19,26 +27,54 @@ export const Card: React.FC<CardProps> = ({
   };
 
   return (
-    <div className={`${baseClasses} ${variants[variant]} ${className}`}>
+    <div 
+      className={`${baseClasses} ${variants[variant]} ${className}`}
+      role={role}
+      aria-labelledby={ariaLabelledBy}
+      aria-describedby={ariaDescribedBy}
+      tabIndex={tabIndex}
+    >
       {children}
     </div>
   );
 };
 
-export const CardHeader: React.FC<{
+export interface CardHeaderProps {
   children: React.ReactNode;
   className?: string;
-}> = ({ children, className = "" }) => (
-  <div
+  id?: string;
+}
+
+export const CardHeader: React.FC<CardHeaderProps> = ({ 
+  children, 
+  className = "",
+  id 
+}) => (
+  <header
+    id={id}
     className={`px-3 sm:px-4 py-3 sm:py-4 border-b border-gray-100 ${className}`}
+    role="banner"
   >
     {children}
-  </div>
+  </header>
 );
 
-export const CardContent: React.FC<{
+export interface CardContentProps {
   children: React.ReactNode;
   className?: string;
-}> = ({ children, className = "" }) => (
-  <div className={`p-3 sm:p-4 ${className}`}>{children}</div>
+  id?: string;
+}
+
+export const CardContent: React.FC<CardContentProps> = ({ 
+  children, 
+  className = "",
+  id 
+}) => (
+  <section
+    id={id}
+    className={`p-3 sm:p-4 ${className}`}
+    role="region"
+  >
+    {children}
+  </section>
 );
