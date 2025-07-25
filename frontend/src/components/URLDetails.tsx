@@ -232,3 +232,5 @@ export const URLDetails: React.FC = React.memo(() => {
     </div>
   );
 });
+
+export default URLDetails;
