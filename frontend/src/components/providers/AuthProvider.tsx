@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import type { User, LoginRequest, RegisterRequest } from "../../types";
 import { authAPI } from "../../services/api";
+import { useLocalStorage } from "../../hooks";
 
 const isValidUser = (obj: unknown): obj is User => {
   return (
@@ -32,33 +33,25 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [storedUser, setStoredUser, removeStoredUser] = useLocalStorage<User | null>("user", null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        if (isValidUser(parsedUser)) {
-          setUser(parsedUser);
-        } else {
-          throw new Error("Invalid user data");
-        }
-      } catch {
-        localStorage.removeItem("user");
-      }
+    if (storedUser && isValidUser(storedUser)) {
+      setUser(storedUser);
+    } else if (storedUser) {
+      removeStoredUser();
     }
     setIsLoading(false);
-  }, []);
+  }, [storedUser, removeStoredUser]);
 
   const login = async (data: LoginRequest) => {
     const response = await authAPI.login(data);
     const { user: newUser } = response;
 
     setUser(newUser);
-    localStorage.setItem("user", JSON.stringify(newUser));
+    setStoredUser(newUser);
   };
 
   const register = async (data: RegisterRequest) => {
@@ -68,7 +61,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = async () => {
     await authAPI.logout();
     setUser(null);
-    localStorage.removeItem("user");
+    removeStoredUser();
   };
 
   const value = {
