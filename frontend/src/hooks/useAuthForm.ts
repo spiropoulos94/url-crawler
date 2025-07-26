@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useAuth } from '../components/providers/AuthProvider';
+import { useState } from "react";
+import { useAuth } from "../components/providers/AuthProvider";
 
 interface AuthFormData {
   username: string;
@@ -8,17 +8,24 @@ interface AuthFormData {
 
 export const useAuthForm = () => {
   const [isRegisterMode, setIsRegisterMode] = useState(false);
-  const [formData, setFormData] = useState<AuthFormData>({ username: '', password: '' });
-  const [error, setError] = useState('');
+  const [formData, setFormData] = useState<AuthFormData>({
+    username: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const { login, register } = useAuth();
 
   const setFieldValue = (field: keyof AuthFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear error and success when user starts typing
     if (error) {
-      setError('');
+      setError("");
+    }
+    if (success) {
+      setSuccess("");
     }
   };
 
@@ -47,23 +54,29 @@ export const useAuthForm = () => {
 
     setIsLoading(true);
     setError("");
+    setSuccess("");
 
     try {
       if (isRegisterMode) {
-        await register({ username: formData.username.trim(), password: formData.password });
-        setError("");
-        alert("Registration successful! Please log in.");
+        await register({
+          username: formData.username.trim(),
+          password: formData.password,
+        });
+        setSuccess("Registration successful! Please log in.");
         setIsRegisterMode(false);
-        setFormData({ username: formData.username, password: '' }); // Keep username, clear password
+        setFormData({ username: formData.username, password: "" }); // Keep username, clear password
       } else {
-        await login({ username: formData.username.trim(), password: formData.password });
+        await login({
+          username: formData.username.trim(),
+          password: formData.password,
+        });
       }
       return true;
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
       setError(
         error.response?.data?.error ||
-        `${isRegisterMode ? "Registration" : "Login"} failed`
+          `${isRegisterMode ? "Registration" : "Login"} failed`
       );
       return false;
     } finally {
@@ -73,14 +86,16 @@ export const useAuthForm = () => {
 
   const toggleMode = () => {
     setIsRegisterMode(!isRegisterMode);
-    setError('');
-    setFormData({ username: '', password: '' });
+    setError("");
+    setSuccess("");
+    setFormData({ username: "", password: "" });
   };
 
   return {
     isRegisterMode,
     formData,
     error,
+    success,
     isLoading,
     setFieldValue,
     handleSubmit,

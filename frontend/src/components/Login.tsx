@@ -13,6 +13,7 @@ export const Login: React.FC = () => {
     isRegisterMode,
     formData,
     error,
+    success,
     isLoading,
     setFieldValue,
     handleSubmit,
@@ -73,6 +74,7 @@ export const Login: React.FC = () => {
               </Stack>
 
               {error && <Alert type="error" message={error} />}
+              {success && <Alert type="success" message={success} />}
 
               <Button
                 type="submit"
