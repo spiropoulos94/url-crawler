@@ -9,14 +9,14 @@ import { Container, Flex, Stack } from "./ui/Layout";
 import { Icon, IconContainer } from "./ui/Icon";
 
 export const Login: React.FC = () => {
-  const { 
-    isRegisterMode, 
-    formData, 
-    error, 
-    isLoading, 
-    setFieldValue, 
-    handleSubmit, 
-    toggleMode 
+  const {
+    isRegisterMode,
+    formData,
+    error,
+    isLoading,
+    setFieldValue,
+    handleSubmit,
+    toggleMode,
   } = useAuthForm();
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -30,26 +30,24 @@ export const Login: React.FC = () => {
         <Container className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-8">
           <Container className="text-center mb-8">
             <Flex justify="center" className="mb-6">
-              <IconContainer 
-                variant="rounded" 
-                bg="primary" 
-                size="xl" 
+              <IconContainer
+                variant="rounded"
+                bg="primary"
+                size="xl"
                 className="bg-gradient-to-r from-primary-500 to-blue-600 shadow-lg"
               >
                 <Icon icon={Globe} size="xl" className="text-white" />
               </IconContainer>
             </Flex>
-            <Heading 
-              level={2} 
-              className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-blue-600 bg-clip-text text-transparent"
-            >
+            <Heading level={2} className="text-3xl ">
               {isRegisterMode ? "Create Account" : "Welcome Back"}
             </Heading>
             <Text variant="subtitle" className="mt-3 font-medium">
-              {isRegisterMode ? "Join Sykell Web Crawler" : "Sign in to continue"}
+              {isRegisterMode
+                ? "Join Sykell Web Crawler"
+                : "Sign in to continue"}
             </Text>
           </Container>
-
           <form onSubmit={onSubmit}>
             <Stack spacing="lg">
               <Stack spacing="md">
@@ -74,9 +72,7 @@ export const Login: React.FC = () => {
                 />
               </Stack>
 
-              {error && (
-                <Alert type="error" message={error} />
-              )}
+              {error && <Alert type="error" message={error} />}
 
               <Button
                 type="submit"
@@ -92,7 +88,7 @@ export const Login: React.FC = () => {
                 <button
                   type="button"
                   onClick={toggleMode}
-                  className="text-primary-600 hover:text-primary-700 font-semibold transition-colors duration-200 cursor-pointer"
+                  className="text-primary-600 hover:text-primary-700 font-semibold transition-colors duration-200 cursor-pointer hover:underline"
                   disabled={isLoading}
                 >
                   {isRegisterMode

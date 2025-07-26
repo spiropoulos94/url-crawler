@@ -48,8 +48,11 @@ export function setupErrorInterceptor(showError: (message: string) => void) {
     // Error: handle globally, then still reject for local handling
     (error) => {
       if (error.response?.status === 401) {
-        // Auth errors: redirect to login (don't show toast)
-        handleAuthError();
+        // Don't auto-redirect on login endpoint - let the form handle it
+        if (!error.config?.url?.includes('/auth/login')) {
+          // Auth errors: redirect to login (don't show toast)
+          handleAuthError();
+        }
       } else {
         // Other errors: show user-friendly message in toast
         const message = getErrorMessage(error);

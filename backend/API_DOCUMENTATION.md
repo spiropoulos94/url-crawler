@@ -1,12 +1,15 @@
 # Sykell Crawler API Documentation
 
 ## Base URL
+
 All API endpoints are prefixed with `/api/v1`
 
 ## Authentication
+
 The API uses JWT tokens stored in HTTP-only cookies for authentication. After successful login, the token is automatically included in subsequent requests.
 
 ## Error Responses
+
 All errors follow a consistent format:
 
 ```json
@@ -17,6 +20,7 @@ All errors follow a consistent format:
 ```
 
 ### Error Codes
+
 - `VALIDATION_ERROR` (400) - Request validation failed
 - `UNAUTHORIZED` (401) - Authentication required or invalid
 - `NOT_FOUND` (404) - Resource not found
@@ -28,17 +32,20 @@ All errors follow a consistent format:
 ## Authentication Endpoints
 
 ### POST /api/v1/auth/register
+
 Register a new user account.
 
 **Request Body:**
+
 ```json
 {
   "username": "string", // required, min 3 characters
-  "password": "string"  // required, min 6 characters
+  "password": "string" // required, min 6 characters
 }
 ```
 
 **Success Response (201):**
+
 ```json
 {
   "user": {
@@ -51,23 +58,27 @@ Register a new user account.
 ```
 
 **Error Responses:**
+
 - 400: Validation error (invalid username/password)
 - 409: Username already exists
 
 ---
 
 ### POST /api/v1/auth/login
+
 Authenticate user and set auth cookie.
 
 **Request Body:**
+
 ```json
 {
   "username": "string", // required
-  "password": "string"  // required
+  "password": "string" // required
 }
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "user": {
@@ -82,15 +93,18 @@ Authenticate user and set auth cookie.
 **Side Effect:** Sets `auth_token` HTTP-only cookie (7 days expiry)
 
 **Error Responses:**
+
 - 400: Validation error
 - 401: Invalid credentials
 
 ---
 
 ### POST /api/v1/auth/logout
+
 Clear authentication cookie.
 
 **Success Response (200):**
+
 ```json
 {
   "message": "Logged out successfully"
@@ -102,12 +116,15 @@ Clear authentication cookie.
 ---
 
 ## URL Management Endpoints
-*All endpoints require authentication*
+
+_All endpoints require authentication_
 
 ### POST /api/v1/urls
+
 Add a new URL for crawling.
 
 **Request Body:**
+
 ```json
 {
   "url": "string" // required, valid URL
@@ -115,6 +132,7 @@ Add a new URL for crawling.
 ```
 
 **Success Response (201):**
+
 ```json
 {
   "id": 1,
@@ -127,14 +145,17 @@ Add a new URL for crawling.
 ```
 
 **Error Responses:**
+
 - 400: Invalid URL format
 
 ---
 
 ### GET /api/v1/urls
+
 Get paginated list of URLs with optional filtering and sorting.
 
 **Query Parameters:**
+
 - `page` (optional): Page number, default 1
 - `limit` (optional): Items per page (1-100), default 10
 - `search` (optional): Search term for URL filtering
@@ -142,6 +163,7 @@ Get paginated list of URLs with optional filtering and sorting.
 - `sort_order` (optional): "asc" or "desc", default "desc"
 
 **Success Response (200):**
+
 ```json
 {
   "urls": [
@@ -184,12 +206,15 @@ Get paginated list of URLs with optional filtering and sorting.
 ---
 
 ### GET /api/v1/urls/:id
+
 Get details for a specific URL.
 
 **Path Parameters:**
+
 - `id`: URL ID (integer)
 
 **Success Response (200):**
+
 ```json
 {
   "id": 1,
@@ -223,23 +248,27 @@ Get details for a specific URL.
 ```
 
 **Error Responses:**
+
 - 400: Invalid URL ID
 - 404: URL not found
 
 ---
 
 ### POST /api/v1/urls/bulk
+
 Perform bulk actions on multiple URLs.
 
 **Request Body:**
+
 ```json
 {
-  "ids": [1, 2, 3],           // required, array of URL IDs
-  "action": "string"          // required, one of: "stop", "delete", "recrawl"
+  "ids": [1, 2, 3], // required, array of URL IDs
+  "action": "string" // required, one of: "stop", "delete", "recrawl"
 }
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "message": "Action completed successfully"
@@ -247,11 +276,13 @@ Perform bulk actions on multiple URLs.
 ```
 
 **Available Actions:**
+
 - `stop`: Stop crawling for the specified URLs
 - `delete`: Delete the specified URLs
 - `recrawl`: Re-queue the specified URLs for crawling
 
 **Error Responses:**
+
 - 400: Invalid action or missing IDs
 
 ---
@@ -259,9 +290,11 @@ Perform bulk actions on multiple URLs.
 ## Health Check Endpoint
 
 ### GET /health
+
 Check API and service health status.
 
 **Success Response (200):**
+
 ```json
 {
   "status": "ok",
@@ -278,6 +311,7 @@ Check API and service health status.
 ```
 
 **Degraded Response (503):**
+
 ```json
 {
   "status": "degraded",
@@ -299,6 +333,7 @@ Check API and service health status.
 ## Data Models
 
 ### URL Status Values
+
 - `queued`: URL is waiting to be crawled
 - `running`: URL is currently being crawled
 - `done`: Crawling completed successfully
@@ -306,6 +341,7 @@ Check API and service health status.
 - `stopped`: Crawling was manually stopped
 
 ### User Model
+
 ```json
 {
   "id": 1,
@@ -316,6 +352,7 @@ Check API and service health status.
 ```
 
 ### URL Model
+
 ```json
 {
   "id": 1,
@@ -330,6 +367,7 @@ Check API and service health status.
 ```
 
 ### CrawlResult Model
+
 ```json
 {
   "id": 1,
@@ -354,6 +392,7 @@ Check API and service health status.
 ```
 
 ### BrokenURL Model
+
 ```json
 {
   "id": 1,
@@ -371,15 +410,19 @@ Check API and service health status.
 ## Frontend Integration Notes
 
 ### Authentication Flow
+
 1. User registers/logs in → Server sets HTTP-only cookie
 2. Frontend makes requests → Browser automatically includes cookie
 3. Server validates cookie → Returns user data or 401
 
 ### Error Handling
+
 All API responses follow consistent error format. Frontend should check for error structure and display appropriate messages.
 
 ### Pagination
+
 Use `page` and `limit` query parameters. Server returns total count for implementing pagination UI.
 
 ### Real-time Updates
+
 URLs are processed asynchronously. Frontend should poll the GET endpoints or implement WebSocket connections for real-time status updates.

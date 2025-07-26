@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"gorm.io/gorm"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type AuthService interface {
@@ -63,11 +63,11 @@ func (s *authService) Register(username, password string) (*models.User, error) 
 func (s *authService) Login(username, password string) (string, *models.User, error) {
 	user, err := s.userRepo.GetByUsername(username)
 	if err != nil {
-		return "", nil, errors.New("invalid credentials")
+		return "", nil, errors.New("Invalid credentials")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		return "", nil, errors.New("invalid credentials")
+		return "", nil, errors.New("Invalid credentials")
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{

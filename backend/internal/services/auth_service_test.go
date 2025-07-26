@@ -11,7 +11,7 @@ import (
 )
 
 type mockUserRepository struct {
-	users map[string]*models.User
+	users  map[string]*models.User
 	nextID uint
 }
 
@@ -246,19 +246,19 @@ func TestLogin_InvalidCredentials(t *testing.T) {
 			token, user, err := service.Login(tc.username, tc.password)
 
 			if err == nil {
-				t.Error("Expected error for invalid credentials")
+				t.Error("Expected error for Invalid credentials")
 			}
 
 			if token != "" {
-				t.Error("Expected no token on invalid credentials")
+				t.Error("Expected no token on Invalid credentials")
 			}
 
 			if user != nil {
-				t.Error("Expected no user on invalid credentials")
+				t.Error("Expected no user on Invalid credentials")
 			}
 
-			if err.Error() != "invalid credentials" {
-				t.Errorf("Expected 'invalid credentials' error, got '%s'", err.Error())
+			if err.Error() != "Invalid credentials" {
+				t.Errorf("Expected 'Invalid credentials' error, got '%s'", err.Error())
 			}
 		})
 	}
