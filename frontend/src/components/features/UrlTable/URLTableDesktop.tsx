@@ -1,7 +1,7 @@
 import React from "react";
 import { URLTableRow } from "./URLTableRow";
-import { CheckboxCell, TableHeader, Container } from "../ui";
-import type { URL } from "../../types";
+import { CheckboxCell, TableHeader, Container } from "../../ui";
+import type { URL } from "../../../types";
 
 export interface URLTableDesktopProps {
   urls: URL[];
@@ -17,7 +17,7 @@ export interface URLTableDesktopProps {
   className?: string;
 }
 
-export const URLTableDesktop: React.FC<URLTableDesktopProps> = ({
+export const URLTableDesktop: React.FC<URLTableDesktopProps> = React.memo(({
   urls,
   selectedIds,
   onToggleSelection,
@@ -30,13 +30,13 @@ export const URLTableDesktop: React.FC<URLTableDesktopProps> = ({
   isAllSelected,
   className = "",
 }) => {
-  const handleSelectAllChange = (checked: boolean) => {
+  const handleSelectAllChange = React.useCallback((checked: boolean) => {
     if (checked) {
       onSelectAll(urls);
     } else {
       onClearSelection();
     }
-  };
+  }, [onSelectAll, onClearSelection, urls]);
 
   return (
     <Container className={`hidden lg:block overflow-x-auto ${className}`}>
@@ -147,4 +147,4 @@ export const URLTableDesktop: React.FC<URLTableDesktopProps> = ({
       </table>
     </Container>
   );
-};
+});

@@ -1,7 +1,7 @@
 import React from "react";
 import { AlertTriangle } from "lucide-react";
-import { CheckboxCell, TableCell, Text, Badge, StatusBadge } from "../ui";
-import type { URL } from "../../types";
+import { CheckboxCell, TableCell, Text, Badge, StatusBadge } from "../../ui";
+import type { URL } from "../../../types";
 
 export interface URLTableRowProps {
   url: URL;
@@ -12,7 +12,7 @@ export interface URLTableRowProps {
   rowIndex?: number;
 }
 
-export const URLTableRow: React.FC<URLTableRowProps> = ({
+export const URLTableRow: React.FC<URLTableRowProps> = React.memo(({
   url,
   isSelected,
   onToggleSelection,
@@ -118,4 +118,4 @@ export const URLTableRow: React.FC<URLTableRowProps> = ({
       </TableCell>
     </tr>
   );
-};
+});

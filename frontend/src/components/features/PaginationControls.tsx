@@ -13,7 +13,7 @@ export interface PaginationControlsProps {
   onNext: () => void;
 }
 
-export const PaginationControls: React.FC<PaginationControlsProps> = ({
+export const PaginationControls: React.FC<PaginationControlsProps> = React.memo(({
   currentPage,
   totalPages,
   total,
@@ -21,8 +21,10 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
   onPrevious,
   onNext,
 }) => {
-  const startItem = Math.min((currentPage - 1) * limit + 1, total);
-  const endItem = Math.min(currentPage * limit, total);
+  const { startItem, endItem } = React.useMemo(() => ({
+    startItem: Math.min((currentPage - 1) * limit + 1, total),
+    endItem: Math.min(currentPage * limit, total),
+  }), [currentPage, limit, total]);
 
   return (
     <Container className="bg-gradient-to-r from-gray-50 to-gray-100 px-3 sm:px-6 lg:px-8 py-4 sm:py-6 border-t border-gray-200">
@@ -98,4 +100,4 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
       </Flex>
     </Container>
   );
-};
+});

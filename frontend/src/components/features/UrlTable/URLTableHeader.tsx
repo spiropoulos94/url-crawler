@@ -1,8 +1,8 @@
 import React from "react";
 import { X } from "lucide-react";
-import { SearchInput } from "../features/SearchInput";
-import { BulkActionBar } from "../features/BulkActionBar";
-import { Button, Text, Stack, Flex } from "../ui";
+import { SearchInput } from "../SearchInput";
+import { BulkActionBar } from "../BulkActionBar";
+import { Button, Text, Stack, Flex } from "../../ui";
 
 export interface URLTableHeaderProps {
   searchValue: string;
@@ -15,7 +15,7 @@ export interface URLTableHeaderProps {
   className?: string;
 }
 
-export const URLTableHeader: React.FC<URLTableHeaderProps> = ({
+export const URLTableHeader: React.FC<URLTableHeaderProps> = React.memo(({
   searchValue,
   onSearchChange,
   selectedCount,
@@ -25,7 +25,10 @@ export const URLTableHeader: React.FC<URLTableHeaderProps> = ({
   onClearSort,
   className = "",
 }) => {
-  const showClearSort = sortBy && sortBy !== "created_at" && onClearSort;
+  const showClearSort = React.useMemo(() => 
+    sortBy && sortBy !== "created_at" && onClearSort, 
+    [sortBy, onClearSort]
+  );
 
   return (
     <div className={className}>
@@ -59,4 +62,4 @@ export const URLTableHeader: React.FC<URLTableHeaderProps> = ({
       </Stack>
     </div>
   );
-};
+});

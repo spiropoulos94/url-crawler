@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 import { AddURL } from '../../components/AddURL';
-import { URLTable } from '../../components/URLTable';
+import { URLTable } from '../../components/features/UrlTable';
 
 // Mock the API
 vi.mock('../../services/api', () => ({

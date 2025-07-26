@@ -1,6 +1,6 @@
 import React from "react";
 import { AddURL } from "./AddURL";
-import { URLTable } from "./URLTable";
+import { URLTable } from "./features/UrlTable";
 
 export const Dashboard: React.FC = () => {
   return (
