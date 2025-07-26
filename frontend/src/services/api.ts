@@ -20,14 +20,7 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
+  withCredentials: true, // Important: This sends cookies with requests
 });
 
 /**
@@ -66,6 +59,9 @@ export const authAPI = {
 
   register: (data: RegisterRequest): Promise<AxiosResponse<{ user: User }>> =>
     api.post("/auth/register", data),
+
+  logout: (): Promise<AxiosResponse<{ message: string }>> =>
+    api.post("/auth/logout"),
 };
 
 export const urlAPI = {

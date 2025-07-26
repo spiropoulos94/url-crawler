@@ -18,7 +18,6 @@ export function getErrorMessage(error: unknown): string {
 }
 
 export function handleAuthError(): void {
-  localStorage.removeItem("token");
   localStorage.removeItem("user");
   window.location.href = "/login";
 }

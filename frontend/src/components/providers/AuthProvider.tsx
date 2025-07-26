@@ -2,9 +2,19 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import type { User, LoginRequest, RegisterRequest } from "../../types";
 import { authAPI } from "../../services/api";
 
+const isValidUser = (obj: unknown): obj is User => {
+  return (
+    typeof obj === "object" &&
+    obj !== null &&
+    typeof (obj as User).id === "number" &&
+    typeof (obj as User).username === "string" &&
+    typeof (obj as User).created_at === "string" &&
+    typeof (obj as User).updated_at === "string"
+  );
+};
+
 interface AuthContextType {
   user: User | null;
-  token: string | null;
   login: (data: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => void;
@@ -23,27 +33,31 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
 
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        if (isValidUser(parsedUser)) {
+          setUser(parsedUser);
+        } else {
+          throw new Error("Invalid user data");
+        }
+      } catch {
+        localStorage.removeItem("user");
+      }
     }
     setIsLoading(false);
   }, []);
 
   const login = async (data: LoginRequest) => {
     const response = await authAPI.login(data);
-    const { token: newToken, user: newUser } = response.data;
+    const { user: newUser } = response.data;
 
-    setToken(newToken);
     setUser(newUser);
-    localStorage.setItem("token", newToken);
     localStorage.setItem("user", JSON.stringify(newUser));
   };
 
@@ -51,16 +65,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await authAPI.register(data);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await authAPI.logout();
     setUser(null);
-    setToken(null);
-    localStorage.removeItem("token");
     localStorage.removeItem("user");
   };
 
   const value = {
     user,
-    token,
     login,
     register,
     logout,

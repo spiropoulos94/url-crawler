@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"sykell-crawler/internal/services"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,8 +27,7 @@ type LoginRequest struct {
 }
 
 type AuthResponse struct {
-	Token string      `json:"token"`
-	User  interface{} `json:"user"`
+	User interface{} `json:"user"`
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {
@@ -53,14 +53,40 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := h.authService.Login(req.Username, req.Password)
+	token, user, err := h.authService.Login(req.Username, req.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
+	// Set httpOnly cookie with secure flags
+	c.SetSameSite(http.SameSiteStrictMode)
+	c.SetCookie(
+		"auth_token",           // name
+		token,                  // value
+		int(time.Hour*24*7/time.Second), // maxAge (7 days in seconds)
+		"/",                    // path
+		"",                     // domain (empty = current domain)
+		false,                  // secure (set to true in production with HTTPS)
+		true,                   // httpOnly
+	)
+
 	c.JSON(http.StatusOK, AuthResponse{
-		Token: token,
-		User:  gin.H{"username": req.Username},
+		User: user,
 	})
+}
+
+func (h *AuthHandler) Logout(c *gin.Context) {
+	// Clear the auth cookie
+	c.SetCookie(
+		"auth_token",
+		"",
+		-1,    // maxAge: -1 deletes the cookie
+		"/",
+		"",
+		false, // secure (set to true in production with HTTPS)
+		true,  // httpOnly
+	)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
 }

@@ -33,23 +33,57 @@ function App() {
 
 ### 2. Authentication & Authorization
 
-Authentication is managed through the `AuthProvider` (`src/components/providers/AuthProvider.tsx`):
+Authentication is managed through the `AuthProvider` using **httpOnly cookies** for secure token storage:
 
 ```tsx
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
 
   // Authentication methods
   const login = async (data: LoginRequest) => {
     const response = await authAPI.login(data);
-    const { token: newToken, user: newUser } = response.data;
-    setToken(newToken);
+    const { user: newUser } = response.data;
+    // Backend sets httpOnly cookie automatically
     setUser(newUser);
-    localStorage.setItem("token", newToken);
+    // Only store non-sensitive user data in localStorage
+    localStorage.setItem("user", JSON.stringify(newUser));
   };
 
-  // ... other auth methods
+  const logout = async () => {
+    await authAPI.logout(); // Clears httpOnly cookie
+    setUser(null);
+    localStorage.removeItem("user");
+  };
+};
+```
+
+#### Security Architecture
+
+The authentication system uses a dual-storage approach for enhanced security:
+
+1. **JWT Tokens**: Stored in httpOnly cookies
+
+   - Not accessible via JavaScript (XSS protection)
+   - Automatically sent with requests
+   - SameSite=Strict for CSRF protection
+   - 7-day expiration
+
+2. **User Data**: Stored in localStorage
+   - Only non-sensitive data (id, username, timestamps)
+   - Type-validated on retrieval
+   - Used for UI display purposes
+
+```tsx
+// Type guard for safe localStorage parsing
+const isValidUser = (obj: unknown): obj is User => {
+  return (
+    typeof obj === "object" &&
+    obj !== null &&
+    typeof (obj as User).id === "number" &&
+    typeof (obj as User).username === "string" &&
+    typeof (obj as User).created_at === "string" &&
+    typeof (obj as User).updated_at === "string"
+  );
 };
 ```
 
@@ -154,16 +188,20 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // Automatically sends httpOnly cookies
 });
 
-// Auth interceptor
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// No auth interceptor needed - cookies are sent automatically
+// Error handling interceptor remains for 401 responses
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      handleAuthError(); // Clears localStorage and redirects
+    }
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 ```
 
 ### 6. Type System
@@ -237,9 +275,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized
-      localStorage.removeItem("token");
-      window.location.href = "/login";
+      // Handle unauthorized - cookie is cleared by server
+      handleAuthError(); // Only clears localStorage user data
     }
     return Promise.reject(error);
   }
@@ -266,9 +303,10 @@ The application uses TailwindCSS with a consistent pattern:
 
 1. **Authentication Flow**
 
-   - JWT-based authentication
-   - Protected routes
-   - Persistent sessions
+   - httpOnly cookie-based JWT authentication
+   - XSS and CSRF protection
+   - Protected routes with automatic token handling
+   - Persistent sessions with secure storage
 
 2. **URL Management**
 

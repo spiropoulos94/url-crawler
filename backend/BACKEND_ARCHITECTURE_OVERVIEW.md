@@ -88,6 +88,13 @@ Defines 4 main entities:
     - Cancellation support
     - Comprehensive link analysis
 
+- **`internal/services/auth_service.go:14-104`**
+  - JWT token management with HMAC-SHA256 signing
+  - bcrypt password hashing with default cost
+  - User registration and authentication
+  - 7-day token expiration
+  - Token validation and claims extraction
+
 ### Queue Layer
 
 **`internal/queue/redis.go:10-24`**
@@ -125,9 +132,95 @@ Defines 4 main entities:
   - Sorting
   - Bulk actions (start/stop/delete/recrawl)
 
+**`internal/handlers/auth_handler.go:10-92`**
+
+- Authentication endpoints:
+  - `POST /auth/register` - User registration
+  - `POST /auth/login` - Login with httpOnly cookie setting
+  - `POST /auth/logout` - Logout with cookie clearing
+- Secure cookie configuration:
+  - HttpOnly flag (JavaScript inaccessible)
+  - SameSite=Strict (CSRF protection)
+  - 7-day expiration
+  - Path="/" (domain-wide)
+
+**`internal/handlers/middleware.go:13-70`**
+
+- **AuthMiddleware**: JWT token validation
+  - Primary: Reads token from httpOnly cookie
+  - Fallback: Authorization header for backward compatibility
+  - Sets user context for protected routes
+- **CORSMiddleware**: Cross-origin request handling
+  - Configurable allowed origins
+  - Credentials support enabled
+  - Preflight request handling
+
 ---
 
-## 5. Key Features
+## 5. Authentication Architecture
+
+### Security Model
+
+The application implements a **secure, httpOnly cookie-based JWT authentication system** with the following security features:
+
+#### JWT Token Flow
+
+1. **Login Process**:
+   ```go
+   // User submits credentials
+   POST /api/v1/auth/login
+   {
+     "username": "john",
+     "password": "secret123"
+   }
+
+   // Backend validates and creates token
+   token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+     "user_id":  user.ID,
+     "username": user.Username,
+     "exp":      time.Now().Add(time.Hour * 24 * 7).Unix(),
+   })
+
+   // Sets httpOnly cookie
+   c.SetCookie("auth_token", token, 604800, "/", "", false, true)
+   ```
+
+2. **Request Authentication**:
+   ```go
+   // AuthMiddleware extracts token from cookie
+   token, err := c.Cookie("auth_token")
+   
+   // Validates JWT signature and expiration
+   claims, err := authService.ValidateToken(token)
+   
+   // Sets user context for handlers
+   c.Set("user_id", claims["user_id"])
+   ```
+
+3. **Logout Process**:
+   ```go
+   // Clears cookie by setting negative Max-Age
+   c.SetCookie("auth_token", "", -1, "/", "", false, true)
+   ```
+
+#### Security Features
+
+- **XSS Protection**: HttpOnly cookies prevent JavaScript access
+- **CSRF Protection**: SameSite=Strict prevents cross-site requests
+- **Token Integrity**: HMAC-SHA256 signature validation
+- **Password Security**: bcrypt hashing with default cost
+- **Automatic Expiration**: 7-day token lifetime
+- **Secure Headers**: Proper CORS configuration
+
+#### Database Security
+
+- **Password Storage**: Never stored in plain text, always bcrypt hashed
+- **User Model**: Soft deletes with GORM timestamps
+- **Unique Constraints**: Username uniqueness enforced at DB level
+
+---
+
+## 6. Key Features
 
 - **Asynchronous Processing**: URLs are queued in Redis and processed by background workers
 - **Comprehensive Analysis**:
@@ -139,14 +232,14 @@ Defines 4 main entities:
   - Login form detection
 - **Job Control**: Start, stop, and recrawl URLs with real-time status updates
 - **Soft Deletes**: Supports restoration of soft-deleted URLs
-- **Authentication**: JWT-based auth with protected routes
+- **Authentication**: Secure httpOnly cookie-based JWT authentication
 - **Scalable Design**:
   - Clean separation of concerns
   - Dependency injection
 
 ---
 
-## System Architecture Summary
+## 7. System Architecture Summary
 
 The system follows a **producer-consumer pattern**:
 

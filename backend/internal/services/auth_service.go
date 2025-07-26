@@ -13,7 +13,7 @@ import (
 
 type AuthService interface {
 	Register(username, password string) (*models.User, error)
-	Login(username, password string) (string, error)
+	Login(username, password string) (string, *models.User, error)
 	ValidateToken(tokenString string) (*jwt.MapClaims, error)
 }
 
@@ -60,14 +60,14 @@ func (s *authService) Register(username, password string) (*models.User, error) 
 	return user, nil
 }
 
-func (s *authService) Login(username, password string) (string, error) {
+func (s *authService) Login(username, password string) (string, *models.User, error) {
 	user, err := s.userRepo.GetByUsername(username)
 	if err != nil {
-		return "", errors.New("invalid credentials")
+		return "", nil, errors.New("invalid credentials")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		return "", errors.New("invalid credentials")
+		return "", nil, errors.New("invalid credentials")
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -78,10 +78,12 @@ func (s *authService) Login(username, password string) (string, error) {
 
 	tokenString, err := token.SignedString([]byte(s.jwtSecret))
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
-	return tokenString, nil
+	// Clear password before returning user
+	user.Password = ""
+	return tokenString, user, nil
 }
 
 func (s *authService) ValidateToken(tokenString string) (*jwt.MapClaims, error) {
