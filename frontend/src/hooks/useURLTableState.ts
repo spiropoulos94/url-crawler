@@ -7,8 +7,8 @@ import { useBulkSelection } from "./useBulkSelection";
 export const useURLTableState = () => {
   const pagination = usePagination({ initialLimit: 10 });
   const { data, isLoading, error, refetch } = useURLs(pagination.params);
-  
-  const urls = data?.urls || [];
+
+  const urls = useMemo(() => data?.urls || [], [data?.urls]);
   const total = data?.total || 0;
   const totalPages = Math.ceil(total / pagination.limit);
 
@@ -26,8 +26,8 @@ export const useURLTableState = () => {
   }, [selectAllItems, urls]);
 
   // Memoize expensive calculations
-  const shouldRefresh = useMemo(() => 
-    urls.some((url) => ["queued", "running"].includes(url.status)),
+  const shouldRefresh = useMemo(
+    () => urls.some((url) => ["queued", "running"].includes(url.status)),
     [urls]
   );
 
@@ -46,17 +46,17 @@ export const useURLTableState = () => {
     isLoading,
     error,
     refetch,
-    
+
     // Pagination
     pagination,
-    
+
     // Selection
     selectedIds,
     isAllSelected,
     selectAll,
     toggleSelection,
     clearSelection,
-    
+
     // Auto-refresh
     shouldRefresh,
   };

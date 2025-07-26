@@ -2,16 +2,23 @@ import React from "react";
 import { Globe, Search } from "lucide-react";
 import { TableLoadingSkeleton } from "../../LoadingSpinner";
 import { EmptyState } from "../../EmptyState";
-import { Card, CardHeader, CardContent, Heading, Flex, Container } from "../../ui";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  Heading,
+  Flex,
+  Container,
+} from "../../ui";
 import { URLTableHeader } from "./URLTableHeader";
 
 interface URLTableStatesProps {
   className?: string;
 }
 
-interface URLTableLoadingStateProps extends URLTableStatesProps {}
-
-export const URLTableLoadingState: React.FC<URLTableLoadingStateProps> = ({ className = "" }) => (
+export const URLTableLoadingState: React.FC<URLTableStatesProps> = ({
+  className = "",
+}) => (
   <Card className={className}>
     <CardHeader className="bg-gradient-to-r from-primary-50 to-blue-50">
       <Heading
@@ -31,9 +38,9 @@ interface URLTableErrorStateProps extends URLTableStatesProps {
   onRetry: () => void;
 }
 
-export const URLTableErrorState: React.FC<URLTableErrorStateProps> = ({ 
-  className = "", 
-  onRetry 
+export const URLTableErrorState: React.FC<URLTableErrorStateProps> = ({
+  className = "",
+  onRetry,
 }) => (
   <Card className={className}>
     <CardHeader className="bg-gradient-to-r from-primary-50 to-blue-50">
@@ -53,9 +60,9 @@ export const URLTableErrorState: React.FC<URLTableErrorStateProps> = ({
   </Card>
 );
 
-interface URLTableEmptyStateProps extends URLTableStatesProps {}
-
-export const URLTableEmptyState: React.FC<URLTableEmptyStateProps> = ({ className = "" }) => (
+export const URLTableEmptyState: React.FC<URLTableStatesProps> = ({
+  className = "",
+}) => (
   <Card className={className}>
     <CardHeader className="bg-gradient-to-r from-primary-50 to-blue-50">
       <Heading level={2} className="text-2xl font-bold text-gray-900">
@@ -73,14 +80,14 @@ export const URLTableEmptyState: React.FC<URLTableEmptyStateProps> = ({ classNam
 interface URLTableNoResultsStateProps extends URLTableStatesProps {
   searchValue: string;
   onClearSearch: () => void;
-  urlTableHeaderProps: any;
+  urlTableHeaderProps: React.ComponentProps<typeof URLTableHeader>;
 }
 
-export const URLTableNoResultsState: React.FC<URLTableNoResultsStateProps> = ({ 
-  className = "", 
+export const URLTableNoResultsState: React.FC<URLTableNoResultsStateProps> = ({
+  className = "",
   searchValue,
   onClearSearch,
-  urlTableHeaderProps
+  urlTableHeaderProps,
 }) => (
   <Card className={className}>
     <CardHeader className="bg-gradient-to-r from-primary-50 to-blue-50">

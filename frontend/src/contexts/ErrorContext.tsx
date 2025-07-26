@@ -7,6 +7,8 @@ import {
 } from "react";
 import { setupErrorInterceptor } from "../services/api";
 
+/* eslint-disable react-refresh/only-export-components */
+
 interface ErrorContextType {
   error: string | null;
   showError: (message: string) => void;

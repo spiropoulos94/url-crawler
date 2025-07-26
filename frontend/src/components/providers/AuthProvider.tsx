@@ -3,6 +3,8 @@ import type { User, LoginRequest, RegisterRequest } from "../../types";
 import { authAPI } from "../../services/api";
 import { useLocalStorage } from "../../hooks";
 
+/* eslint-disable react-refresh/only-export-components */
+
 const isValidUser = (obj: unknown): obj is User => {
   return (
     typeof obj === "object" &&
@@ -33,7 +35,8 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [storedUser, setStoredUser, removeStoredUser] = useLocalStorage<User | null>("user", null);
+  const [storedUser, setStoredUser, removeStoredUser] =
+    useLocalStorage<User | null>("user", null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
