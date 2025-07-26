@@ -34,7 +34,7 @@ export const Login: React.FC = () => {
                 variant="rounded"
                 bg="primary"
                 size="xl"
-                className="bg-gradient-to-r from-primary-500 to-blue-600 shadow-lg"
+                className=" bg-blue-500 shadow-lg"
               >
                 <Icon icon={Globe} size="xl" className="text-white" />
               </IconContainer>
@@ -79,7 +79,7 @@ export const Login: React.FC = () => {
                 disabled={isLoading}
                 isLoading={isLoading}
                 fullWidth
-                className="py-4 bg-gradient-to-r from-primary-600 to-blue-600 hover:from-primary-700 hover:to-blue-700 text-lg"
+                className="py-4 bg-blue-500  hover:to-blue-700 text-lg"
               >
                 {isRegisterMode ? "Create Account" : "Sign In"}
               </Button>
