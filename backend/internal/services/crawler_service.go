@@ -1,40 +1,53 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
 	"sykell-crawler/internal/models"
 	"sykell-crawler/internal/repositories"
-	"time"
+	"sykell-crawler/pkg/config"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
 type CrawlerService interface {
-	CrawlURL(urlID uint) error
+	CrawlURL(ctx context.Context, urlID uint) error
 }
 
 type crawlerService struct {
-	urlRepo    repositories.URLRepository
-	resultRepo repositories.CrawlResultRepository
-	client     *http.Client
-	queue      QueueService
+	urlRepo          repositories.URLRepository
+	resultRepo       repositories.CrawlResultRepository
+	client           *http.Client
+	queue            QueueService
+	config           *config.Config
+	linkCheckClient  *http.Client
 }
 
-func NewCrawlerService(urlRepo repositories.URLRepository, resultRepo repositories.CrawlResultRepository, queue QueueService) CrawlerService {
+func NewCrawlerService(urlRepo repositories.URLRepository, resultRepo repositories.CrawlResultRepository, queue QueueService, cfg *config.Config) CrawlerService {
 	return &crawlerService{
 		urlRepo:    urlRepo,
 		resultRepo: resultRepo,
 		queue:      queue,
+		config:     cfg,
 		client: &http.Client{
-			Timeout: 30 * time.Second,
+			Timeout: cfg.HTTPTimeout,
+		},
+		linkCheckClient: &http.Client{
+			Timeout: cfg.LinkCheckTimeout,
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				if len(via) >= 5 {
+					return http.ErrUseLastResponse
+				}
+				return nil
+			},
 		},
 	}
 }
 
-func (s *crawlerService) CrawlURL(urlID uint) error {
+func (s *crawlerService) CrawlURL(ctx context.Context, urlID uint) error {
 	urlModel, err := s.urlRepo.GetByID(urlID)
 	if err != nil {
 		return err
@@ -216,19 +229,9 @@ func (s *crawlerService) analyzeLinks(doc *goquery.Document, baseURL string) (in
 }
 
 func (s *crawlerService) checkURL(targetURL string) (int, error) {
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			if len(via) >= 5 {
-				return http.ErrUseLastResponse
-			}
-			return nil
-		},
-	}
-
-	resp, err := client.Head(targetURL)
+	resp, err := s.linkCheckClient.Head(targetURL)
 	if err != nil {
-		resp, err = client.Get(targetURL)
+		resp, err = s.linkCheckClient.Get(targetURL)
 		if err != nil {
 			return 0, err
 		}

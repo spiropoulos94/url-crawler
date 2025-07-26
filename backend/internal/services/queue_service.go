@@ -42,7 +42,10 @@ func (s *queueService) EnqueueCrawlJob(urlID uint) error {
 		return err
 	}
 
-	return s.redis.LPush(context.Background(), "crawl_queue", jobData).Err()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	return s.redis.LPush(ctx, "crawl_queue", jobData).Err()
 }
 
 func (s *queueService) ProcessCrawlJobs(ctx context.Context, crawlerService CrawlerService) error {
@@ -82,26 +85,34 @@ func (s *queueService) ProcessCrawlJobs(ctx context.Context, crawlerService Craw
 			}
 
 			log.Printf("Processing crawl job for URL ID: %d", job.URLID)
-			if err := crawlerService.CrawlURL(job.URLID); err != nil {
+			crawlCtx, crawlCancel := context.WithTimeout(ctx, 30*time.Second)
+			if err := crawlerService.CrawlURL(crawlCtx, job.URLID); err != nil {
 				log.Printf("Error crawling URL ID %d: %v", job.URLID, err)
 			}
+			crawlCancel()
 		}
 	}
 }
 
 func (s *queueService) CancelCrawlJob(urlID uint) error {
 	key := fmt.Sprintf("cancelled_job:%d", urlID)
-	return s.redis.Set(context.Background(), key, "true", 30*time.Minute).Err()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	return s.redis.Set(ctx, key, "true", 30*time.Minute).Err()
 }
 
 func (s *queueService) ClearCancellation(urlID uint) error {
 	key := fmt.Sprintf("cancelled_job:%d", urlID)
-	return s.redis.Del(context.Background(), key).Err()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	return s.redis.Del(ctx, key).Err()
 }
 
 func (s *queueService) IsCancelled(urlID uint) (bool, error) {
 	key := fmt.Sprintf("cancelled_job:%d", urlID)
-	result, err := s.redis.Get(context.Background(), key).Result()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	result, err := s.redis.Get(ctx, key).Result()
 	if err != nil {
 		if err == redis.Nil {
 			return false, nil

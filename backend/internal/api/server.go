@@ -4,6 +4,10 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 	"sykell-crawler/internal/handlers"
 	"sykell-crawler/internal/repositories"
 	"sykell-crawler/internal/services"
@@ -16,10 +20,13 @@ import (
 )
 
 type Server struct {
-	router *gin.Engine
-	db     *gorm.DB
-	redis  *redis.Client
-	config *config.Config
+	router        *gin.Engine
+	db            *gorm.DB
+	redis         *redis.Client
+	config        *config.Config
+	workerCtx     context.Context
+	workerCancel  context.CancelFunc
+	workerWg      sync.WaitGroup
 }
 
 func NewServer(db *gorm.DB, redis *redis.Client, cfg *config.Config) *Server {
@@ -29,11 +36,15 @@ func NewServer(db *gorm.DB, redis *redis.Client, cfg *config.Config) *Server {
 	router.Use(gin.Recovery())
 	router.Use(handlers.CORSMiddleware(cfg))
 
+	ctx, cancel := context.WithCancel(context.Background())
+
 	s := &Server{
-		router: router,
-		db:     db,
-		redis:  redis,
-		config: cfg,
+		router:       router,
+		db:           db,
+		redis:        redis,
+		config:       cfg,
+		workerCtx:    ctx,
+		workerCancel: cancel,
 	}
 
 	s.setupRoutes()
@@ -83,12 +94,18 @@ func (s *Server) startBackgroundWorkers() {
 	resultRepo := repositories.NewCrawlResultRepository(s.db)
 
 	queueService := services.NewQueueService(s.redis)
-	crawlerService := services.NewCrawlerService(urlRepo, resultRepo, queueService)
+	crawlerService := services.NewCrawlerService(urlRepo, resultRepo, queueService, s.config)
 
+	s.workerWg.Add(1)
 	go func() {
+		defer s.workerWg.Done()
 		log.Println("Starting background crawler worker...")
-		if err := queueService.ProcessCrawlJobs(context.Background(), crawlerService); err != nil {
-			log.Printf("Crawler worker error: %v", err)
+		if err := queueService.ProcessCrawlJobs(s.workerCtx, crawlerService); err != nil {
+			if err != context.Canceled {
+				log.Printf("Crawler worker error: %v", err)
+			} else {
+				log.Println("Crawler worker stopped gracefully")
+			}
 		}
 	}()
 }
@@ -142,5 +159,67 @@ func (s *Server) checkRedis(ctx context.Context) gin.H {
 }
 
 func (s *Server) Run(addr string) error {
-	return s.router.Run(addr)
+	// Start the HTTP server
+	server := &http.Server{
+		Addr:    addr,
+		Handler: s.router,
+	}
+
+	// Channel to listen for interrupt signals
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	// Start server in a goroutine
+	go func() {
+		log.Printf("Server starting on %s", addr)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Server failed to start: %v", err)
+		}
+	}()
+
+	// Wait for interrupt signal
+	<-quit
+	log.Println("Received shutdown signal")
+
+	// Create a context with timeout for shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Shutdown background workers first
+	if err := s.Shutdown(ctx); err != nil {
+		log.Printf("Background workers shutdown error: %v", err)
+	}
+
+	// Shutdown HTTP server
+	log.Println("Shutting down HTTP server...")
+	if err := server.Shutdown(ctx); err != nil {
+		log.Printf("HTTP server shutdown error: %v", err)
+		return err
+	}
+
+	log.Println("Server shutdown complete")
+	return nil
+}
+
+func (s *Server) Shutdown(ctx context.Context) error {
+	log.Println("Shutting down background workers...")
+	
+	// Cancel worker context
+	s.workerCancel()
+	
+	// Wait for workers to finish with timeout
+	done := make(chan struct{})
+	go func() {
+		s.workerWg.Wait()
+		close(done)
+	}()
+	
+	select {
+	case <-done:
+		log.Println("All background workers stopped gracefully")
+		return nil
+	case <-ctx.Done():
+		log.Println("Shutdown timeout reached, forcing exit")
+		return ctx.Err()
+	}
 }

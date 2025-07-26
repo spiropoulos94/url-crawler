@@ -6,7 +6,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"sykell-crawler/internal/models"
+	"sykell-crawler/pkg/config"
 	"testing"
+	"time"
 )
 
 type mockURLRepository struct {
@@ -123,12 +125,19 @@ func (m *mockQueueService) IsCancelled(urlID uint) (bool, error) {
 	return m.cancelled, nil
 }
 
+func createTestConfig() *config.Config {
+	return &config.Config{
+		HTTPTimeout:      30 * time.Second,
+		LinkCheckTimeout: 10 * time.Second,
+	}
+}
+
 func TestNewCrawlerService(t *testing.T) {
 	urlRepo := &mockURLRepository{}
 	resultRepo := &mockCrawlResultRepository{}
 	queue := &mockQueueService{}
 	
-	service := NewCrawlerService(urlRepo, resultRepo, queue)
+	service := NewCrawlerService(urlRepo, resultRepo, queue, createTestConfig())
 	if service == nil {
 		t.Error("Expected non-nil service")
 	}
@@ -166,8 +175,8 @@ func TestCrawlURL_Success(t *testing.T) {
 	}
 	queue := &mockQueueService{cancelled: false}
 
-	service := NewCrawlerService(urlRepo, resultRepo, queue)
-	err := service.CrawlURL(1)
+	service := NewCrawlerService(urlRepo, resultRepo, queue, createTestConfig())
+	err := service.CrawlURL(context.Background(), 1)
 
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
@@ -204,8 +213,8 @@ func TestCrawlURL_URLNotFound(t *testing.T) {
 	}
 	queue := &mockQueueService{}
 
-	service := NewCrawlerService(urlRepo, resultRepo, queue)
-	err := service.CrawlURL(999)
+	service := NewCrawlerService(urlRepo, resultRepo, queue, createTestConfig())
+	err := service.CrawlURL(context.Background(), 999)
 
 	if err == nil {
 		t.Error("Expected error for non-existent URL")
@@ -227,8 +236,8 @@ func TestCrawlURL_Cancelled(t *testing.T) {
 	}
 	queue := &mockQueueService{cancelled: true}
 
-	service := NewCrawlerService(urlRepo, resultRepo, queue)
-	err := service.CrawlURL(1)
+	service := NewCrawlerService(urlRepo, resultRepo, queue, createTestConfig())
+	err := service.CrawlURL(context.Background(), 1)
 
 	if err != nil {
 		t.Errorf("Expected no error for cancelled job, got %v", err)
@@ -259,8 +268,8 @@ func TestCrawlURL_HTTPError(t *testing.T) {
 	}
 	queue := &mockQueueService{cancelled: false}
 
-	service := NewCrawlerService(urlRepo, resultRepo, queue)
-	err := service.CrawlURL(1)
+	service := NewCrawlerService(urlRepo, resultRepo, queue, createTestConfig())
+	err := service.CrawlURL(context.Background(), 1)
 
 	if err != nil {
 		t.Errorf("Expected no error (should handle HTTP errors gracefully), got %v", err)
