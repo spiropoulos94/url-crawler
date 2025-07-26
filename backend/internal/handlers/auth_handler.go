@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"sykell-crawler/internal/errors"
 	"sykell-crawler/internal/services"
 	"time"
 
@@ -33,13 +34,13 @@ type AuthResponse struct {
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		errors.RespondWithError(c, errors.ValidationError(err.Error()))
 		return
 	}
 
 	user, err := h.authService.Register(req.Username, req.Password)
 	if err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		errors.RespondWithError(c, errors.ConflictError(err.Error()))
 		return
 	}
 
@@ -49,13 +50,13 @@ func (h *AuthHandler) Register(c *gin.Context) {
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		errors.RespondWithError(c, errors.ValidationError(err.Error()))
 		return
 	}
 
 	token, user, err := h.authService.Login(req.Username, req.Password)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		errors.RespondWithError(c, errors.UnauthorizedError(err.Error()))
 		return
 	}
 

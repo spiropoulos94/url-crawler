@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"sykell-crawler/internal/errors"
 	"sykell-crawler/internal/services"
 
 	"github.com/gin-gonic/gin"
@@ -35,13 +36,13 @@ type URLListResponse struct {
 func (h *URLHandler) AddURL(c *gin.Context) {
 	var req AddURLRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		errors.RespondWithError(c, errors.ValidationError(err.Error()))
 		return
 	}
 
 	result, err := h.urlService.AddURL(req.URL)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		errors.RespondWithError(c, errors.ValidationError(err.Error()))
 		return
 	}
 
@@ -52,13 +53,13 @@ func (h *URLHandler) GetURL(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid URL ID"})
+		errors.RespondWithError(c, errors.ValidationError("Invalid URL ID"))
 		return
 	}
 
 	url, err := h.urlService.GetURL(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "URL not found"})
+		errors.RespondWithError(c, errors.NotFoundError("URL not found"))
 		return
 	}
 
@@ -81,7 +82,7 @@ func (h *URLHandler) GetAllURLs(c *gin.Context) {
 
 	urls, total, err := h.urlService.GetAllURLs(page, limit, search, sortBy, sortOrder)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		errors.RespondWithStandardError(c, err)
 		return
 	}
 
@@ -98,7 +99,7 @@ func (h *URLHandler) GetAllURLs(c *gin.Context) {
 func (h *URLHandler) BulkAction(c *gin.Context) {
 	var req BulkActionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		errors.RespondWithError(c, errors.ValidationError(err.Error()))
 		return
 	}
 
@@ -111,12 +112,12 @@ func (h *URLHandler) BulkAction(c *gin.Context) {
 	case "recrawl":
 		err = h.urlService.RecrawlURLs(req.IDs)
 	default:
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid action"})
+		errors.RespondWithError(c, errors.ValidationError("Invalid action"))
 		return
 	}
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		errors.RespondWithStandardError(c, err)
 		return
 	}
 

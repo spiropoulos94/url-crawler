@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"fmt"
-	"net/http"
 	"strings"
+	"sykell-crawler/internal/errors"
 	"sykell-crawler/internal/services"
 	"sykell-crawler/pkg/config"
 
@@ -18,14 +18,14 @@ func AuthMiddleware(authService services.AuthService) gin.HandlerFunc {
 			// Fallback to Authorization header for backward compatibility
 			authHeader := c.GetHeader("Authorization")
 			if authHeader == "" {
-				c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
+				errors.RespondWithError(c, errors.UnauthorizedError("Authentication required"))
 				c.Abort()
 				return
 			}
 
 			tokenParts := strings.Split(authHeader, " ")
 			if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
-				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization format"})
+				errors.RespondWithError(c, errors.UnauthorizedError("Invalid authorization format"))
 				c.Abort()
 				return
 			}
@@ -34,7 +34,7 @@ func AuthMiddleware(authService services.AuthService) gin.HandlerFunc {
 
 		claims, err := authService.ValidateToken(token)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			errors.RespondWithError(c, errors.UnauthorizedError("Invalid token"))
 			c.Abort()
 			return
 		}
