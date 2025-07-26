@@ -22,8 +22,8 @@ export const URLTable: React.FC<URLTableProps> = ({ className = "" }) => {
   const { data, isLoading, error, refetch } = useURLs(pagination.params);
   const bulkActionMutation = useBulkAction();
 
-  const urls = data?.data?.urls || [];
-  const total = data?.data?.total || 0;
+  const urls = data?.urls || [];
+  const total = data?.total || 0;
   const totalPages = Math.ceil(total / pagination.limit);
 
   const {
@@ -43,7 +43,7 @@ export const URLTable: React.FC<URLTableProps> = ({ className = "" }) => {
   });
 
   const handleBulkAction = (
-    action: "start" | "stop" | "delete" | "recrawl"
+    action: "stop" | "delete" | "recrawl"
   ) => {
     if (selectedIds.length === 0) return;
 

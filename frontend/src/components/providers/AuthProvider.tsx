@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (data: LoginRequest) => {
     const response = await authAPI.login(data);
-    const { user: newUser } = response.data;
+    const { user: newUser } = response;
 
     setUser(newUser);
     localStorage.setItem("user", JSON.stringify(newUser));

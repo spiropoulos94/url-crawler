@@ -1,6 +1,12 @@
 import type { AxiosError } from "axios";
+import { ValidationError } from "./validation";
 
 export function getErrorMessage(error: unknown): string {
+  // Handle validation errors specifically
+  if (error instanceof ValidationError) {
+    return `Data validation failed: ${error.message}`;
+  }
+
   if (error instanceof Error) {
     return error.message;
   }

@@ -8,7 +8,7 @@ export interface URLTableHeaderProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
   selectedCount: number;
-  onBulkAction: (action: "start" | "stop" | "delete" | "recrawl") => void;
+  onBulkAction: (action: "stop" | "delete" | "recrawl") => void;
   bulkActionDisabled?: boolean;
   sortBy?: string;
   onClearSort?: () => void;

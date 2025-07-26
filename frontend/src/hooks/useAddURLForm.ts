@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useAddURL } from './useURLs';
 import type { AxiosError } from 'axios';
-import type { AddURLResponse } from '../types';
 
 interface FormData {
   url: string;
@@ -63,7 +62,9 @@ export const useAddURLForm = () => {
     try {
       const response = await addUrlMutation.mutateAsync({
         url: formData.url.trim(),
-      }) as AddURLResponse;
+      });
+
+      // Since the API now returns AddURLResponse directly, no need to cast
 
       // Success! Reset form
       setFormData({ url: '' });

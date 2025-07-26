@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen } from "../../test-utils";
 import { AddURL } from "../AddURL";
 import { vi } from "vitest";

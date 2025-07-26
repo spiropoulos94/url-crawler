@@ -21,7 +21,7 @@ export const URLDetails: React.FC = React.memo(() => {
 
   // Auto-refresh every 3 seconds if the URL is being crawled
   useEffect(() => {
-    const url = data?.data;
+    const url = data;
     if (url && ["queued", "running"].includes(url.status)) {
       const interval = setInterval(() => {
         refetch();
@@ -29,9 +29,9 @@ export const URLDetails: React.FC = React.memo(() => {
 
       return () => clearInterval(interval);
     }
-  }, [data?.data, refetch]);
+  }, [data, refetch]);
 
-  const url = data?.data;
+  const url = data;
   const result = url?.results?.[0];
 
   const handleAction = (action: "stop" | "recrawl" | "delete") => {

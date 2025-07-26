@@ -1,16 +1,29 @@
 import axios, { type AxiosResponse } from "axios";
 import type {
-  AuthResponse,
   LoginRequest,
   RegisterRequest,
-  URL,
-  URLListResponse,
   AddURLRequest,
   BulkActionRequest,
-  User,
   PaginationParams,
 } from "../types";
+import {
+  URLSchema,
+  URLListResponseSchema,
+  AuthResponseSchema,
+  RegisterResponseSchema,
+  LogoutResponseSchema,
+  BulkActionResponseSchema,
+  AddURLResponseSchema,
+  type URL,
+  type URLListResponse,
+  type AuthResponse,
+  type RegisterResponse,
+  type LogoutResponse,
+  type BulkActionResponse,
+  type AddURLResponse,
+} from "../schemas/api";
 import { getErrorMessage, handleAuthError } from "../utils/errorHandler";
+import { createValidatedAPIFunction } from "../utils/validation";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:8080/api/v1";
@@ -53,30 +66,47 @@ export function setupErrorInterceptor(showError: (message: string) => void) {
   };
 }
 
-export const authAPI = {
+// Raw API functions (internal use only)
+const rawAuthAPI = {
   login: (data: LoginRequest): Promise<AxiosResponse<AuthResponse>> =>
     api.post("/auth/login", data),
 
-  register: (data: RegisterRequest): Promise<AxiosResponse<{ user: User }>> =>
+  register: (data: RegisterRequest): Promise<AxiosResponse<RegisterResponse>> =>
     api.post("/auth/register", data),
 
-  logout: (): Promise<AxiosResponse<{ message: string }>> =>
+  logout: (): Promise<AxiosResponse<LogoutResponse>> =>
     api.post("/auth/logout"),
 };
 
-export const urlAPI = {
+// Validated API functions (public interface)
+export const authAPI = {
+  login: createValidatedAPIFunction(rawAuthAPI.login, AuthResponseSchema),
+  register: createValidatedAPIFunction(rawAuthAPI.register, RegisterResponseSchema),
+  logout: createValidatedAPIFunction(rawAuthAPI.logout, LogoutResponseSchema),
+};
+
+// Raw URL API functions (internal use only)
+const rawUrlAPI = {
   getAll: (params: PaginationParams): Promise<AxiosResponse<URLListResponse>> => 
     api.get("/urls", { params }),
 
   getById: (id: number): Promise<AxiosResponse<URL>> => api.get(`/urls/${id}`),
 
-  add: (data: AddURLRequest): Promise<AxiosResponse<URL>> =>
+  add: (data: AddURLRequest): Promise<AxiosResponse<AddURLResponse>> =>
     api.post("/urls", data),
 
   bulkAction: (
     data: BulkActionRequest
-  ): Promise<AxiosResponse<{ message: string }>> =>
+  ): Promise<AxiosResponse<BulkActionResponse>> =>
     api.post("/urls/bulk", data),
+};
+
+// Validated URL API functions (public interface)
+export const urlAPI = {
+  getAll: createValidatedAPIFunction(rawUrlAPI.getAll, URLListResponseSchema),
+  getById: createValidatedAPIFunction(rawUrlAPI.getById, URLSchema),
+  add: createValidatedAPIFunction(rawUrlAPI.add, AddURLResponseSchema),
+  bulkAction: createValidatedAPIFunction(rawUrlAPI.bulkAction, BulkActionResponseSchema),
 };
 
 export default api;

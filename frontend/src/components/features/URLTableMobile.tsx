@@ -31,7 +31,7 @@ export const URLTableMobile: React.FC<URLTableMobileProps> = ({
         Table showing {urls.length} URL{urls.length === 1 ? '' : 's'} with their status, links count, and creation date. Each card can be selected using checkboxes and viewed in detail.
       </div>
       <Stack spacing="lg" aria-describedby="mobile-table-description">
-        {urls.map((url: URL, index) => {
+        {urls.map((url: URL) => {
           const latestResult = url.results?.[0];
           const isSelected = selectedIds.includes(url.id);
           
@@ -57,7 +57,7 @@ export const URLTableMobile: React.FC<URLTableMobileProps> = ({
                     <input
                       type="checkbox"
                       checked={isSelected}
-                      onChange={(e) => onToggleSelection(url.id)}
+                      onChange={() => onToggleSelection(url.id)}
                       className="w-5 h-5 rounded-md border-2 border-gray-300 text-primary-600 focus:ring-primary-500 focus:ring-2 transition-all duration-200"
                       aria-label={`Select URL: ${url.url}`}
                       aria-describedby={`url-title-${url.id}`}
